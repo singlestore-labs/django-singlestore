@@ -1,3 +1,5 @@
+import datetime
+import decimal
 import uuid
 
 from django.conf import settings
@@ -6,13 +8,12 @@ from django.db.backends.utils import split_tzname_delta
 from django.db.models import Exists, ExpressionWrapper, Lookup
 from django.db.models.constants import OnConflict
 from django.utils import timezone
+from django.utils.dateparse import parse_date, parse_datetime, parse_time
 from django.utils.encoding import force_str
 from django.utils.regex_helper import _lazy_re_compile
 
 
 class DatabaseOperations(BaseDatabaseOperations):
-    compiler_module = "django.db.backends.mysql.compiler"
-
     # MySQL stores positive fields as UNSIGNED ints.
     integer_field_ranges = {
         **BaseDatabaseOperations.integer_field_ranges,
@@ -21,21 +22,21 @@ class DatabaseOperations(BaseDatabaseOperations):
         "PositiveBigIntegerField": (0, 18446744073709551615),
     }
     cast_data_types = {
-        "AutoField": "signed integer",
-        "BigAutoField": "signed integer",
-        "SmallAutoField": "signed integer",
-        "CharField": "char(%(max_length)s)",
-        "DecimalField": "decimal(%(max_digits)s, %(decimal_places)s)",
-        "TextField": "char",
-        "IntegerField": "signed integer",
-        "BigIntegerField": "signed integer",
-        "SmallIntegerField": "signed integer",
-        "PositiveBigIntegerField": "unsigned integer",
-        "PositiveIntegerField": "unsigned integer",
-        "PositiveSmallIntegerField": "unsigned integer",
-        "DurationField": "signed integer",
+        "AutoField": "BIGINT",
+        "BigAutoField": "BIGINT",
+        "SmallAutoField": "BIGINT",
+        "CharField": "CHAR(%(max_length)s)",
+        "DecimalField": "DECIMAL(%(max_digits)s, %(decimal_places)s)",
+        "TextField": "CHAR",
+        "IntegerField": "INT",
+        "BigIntegerField": "BIGINT",
+        "SmallIntegerField": "SMALLINT",
+        "PositiveBigIntegerField": "UNSIGNED BIGINT",
+        "PositiveIntegerField": "UNSIGNED INT",
+        "PositiveSmallIntegerField": "UNSIGNED SMALLINT",
+        "DurationField": "BIGINT",
     }
-    cast_char_field_without_max_length = "char"
+    cast_char_field_without_max_length = "CHAR"
     explain_prefix = "EXPLAIN"
 
     # EXTRACT format cannot be passed in parameters.
@@ -73,7 +74,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         }
         if lookup_type in fields:
             format_str = fields[lookup_type]
-            return f"CAST(DATE_FORMAT({sql}, %s) AS DATE)", (*params, format_str)
+            return f"(DATE_FORMAT({sql}, %s) :> DATE)", (*params, format_str)
         elif lookup_type == "quarter":
             return (
                 f"MAKEDATE(YEAR({sql}), 1) + "
@@ -117,14 +118,14 @@ class DatabaseOperations(BaseDatabaseOperations):
         format_def = ("0000-", "01", "-01", " 00:", "00", ":00")
         if lookup_type == "quarter":
             return (
-                f"CAST(DATE_FORMAT(MAKEDATE(YEAR({sql}), 1) + "
+                f"(DATE_FORMAT(MAKEDATE(YEAR({sql}), 1) + "
                 f"INTERVAL QUARTER({sql}) QUARTER - "
-                f"INTERVAL 1 QUARTER, %s) AS DATETIME)"
+                f"INTERVAL 1 QUARTER, %s) :> DATETIME)"
             ), (*params, *params, "%Y-%m-01 00:00:00")
         if lookup_type == "week":
             return (
-                f"CAST(DATE_FORMAT("
-                f"DATE_SUB({sql}, INTERVAL WEEKDAY({sql}) DAY), %s) AS DATETIME)"
+                f"(DATE_FORMAT("
+                f"DATE_SUB({sql}, INTERVAL WEEKDAY({sql}) DAY), %s) :> DATETIME)"
             ), (*params, *params, "%Y-%m-%d 00:00:00")
         try:
             i = fields.index(lookup_type) + 1
@@ -132,7 +133,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             pass
         else:
             format_str = "".join(format[:i] + format_def[i:])
-            return f"CAST(DATE_FORMAT({sql}, %s) AS DATETIME)", (*params, format_str)
+            return f"(DATE_FORMAT({sql}, %s) :> DATETIME)", (*params, format_str)
         return sql, params
 
     def time_trunc_sql(self, lookup_type, sql, params, tzname=None):
@@ -144,7 +145,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         }
         if lookup_type in fields:
             format_str = fields[lookup_type]
-            return f"CAST(DATE_FORMAT({sql}, %s) AS TIME)", (*params, format_str)
+            return f"(DATE_FORMAT({sql}, %s) :> TIME)", (*params, format_str)
         else:
             return f"TIME({sql})", params
 
@@ -186,8 +187,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         return "`%s`" % name
 
     def return_insert_columns(self, fields):
-        # MySQL and MariaDB < 10.5.0 don't support an INSERT...RETURNING
-        # statement.
         if not fields:
             return "", ()
         columns = [
@@ -260,13 +259,13 @@ class DatabaseOperations(BaseDatabaseOperations):
         if hasattr(value, "resolve_expression"):
             return value
 
-        # MySQL doesn't support tz-aware datetimes
+        # SingleStore doesn't support tz-aware datetimes
         if timezone.is_aware(value):
             if settings.USE_TZ:
                 value = timezone.make_naive(value, self.connection.timezone)
             else:
                 raise ValueError(
-                    "MySQL backend does not support timezone-aware datetimes when "
+                    "SingleStore backend does not support timezone-aware datetimes when "
                     "USE_TZ is False."
                 )
         return str(value)
@@ -279,9 +278,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         if hasattr(value, "resolve_expression"):
             return value
 
-        # MySQL doesn't support tz-aware times
+        # SingleStore doesn't support tz-aware times
         if timezone.is_aware(value):
-            raise ValueError("MySQL backend does not support timezone-aware times.")
+            raise ValueError("SingleStore backend does not support timezone-aware times.")
 
         return value.isoformat(timespec="microseconds")
 
@@ -312,11 +311,14 @@ class DatabaseOperations(BaseDatabaseOperations):
     def get_db_converters(self, expression):
         converters = super().get_db_converters(expression)
         internal_type = expression.output_field.get_internal_type()
-        if internal_type == "BooleanField":
+        if internal_type == "DateTimeField":
+            converters.append(self.convert_datetimefield_value)
+        elif internal_type == "DateField":
+            converters.append(self.convert_datefield_value)
+        elif internal_type == "TimeField":
+            converters.append(self.convert_timefield_value)
+        elif internal_type == "BooleanField":
             converters.append(self.convert_booleanfield_value)
-        elif internal_type == "DateTimeField":
-            if settings.USE_TZ:
-                converters.append(self.convert_datetimefield_value)
         elif internal_type == "UUIDField":
             converters.append(self.convert_uuidfield_value)
         return converters
@@ -328,7 +330,22 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def convert_datetimefield_value(self, value, expression, connection):
         if value is not None:
-            value = timezone.make_aware(value, self.connection.timezone)
+            if not isinstance(value, datetime.datetime):
+                value = parse_datetime(value)
+            if settings.USE_TZ and not timezone.is_aware(value):
+                value = timezone.make_aware(value, self.connection.timezone)
+        return value
+
+    def convert_datefield_value(self, value, expression, connection):
+        if value is not None:
+            if not isinstance(value, datetime.date):
+                value = parse_date(value)
+        return value
+
+    def convert_timefield_value(self, value, expression, connection):
+        if value is not None:
+            if not isinstance(value, datetime.time):
+                value = parse_time(value)
         return value
 
     def convert_uuidfield_value(self, value, expression, connection):
@@ -345,19 +362,6 @@ class DatabaseOperations(BaseDatabaseOperations):
         lhs_sql, lhs_params = lhs
         rhs_sql, rhs_params = rhs
         if internal_type == "TimeField":
-            if self.connection.mysql_is_mariadb:
-                # MariaDB includes the microsecond component in TIME_TO_SEC as
-                # a decimal. MySQL returns an integer without microseconds.
-                return (
-                    "CAST((TIME_TO_SEC(%(lhs)s) - TIME_TO_SEC(%(rhs)s)) "
-                    "* 1000000 AS SIGNED)"
-                ) % {
-                    "lhs": lhs_sql,
-                    "rhs": rhs_sql,
-                }, (
-                    *lhs_params,
-                    *rhs_params,
-                )
             return (
                 "((TIME_TO_SEC(%(lhs)s) * 1000000 + MICROSECOND(%(lhs)s)) -"
                 " (TIME_TO_SEC(%(rhs)s) * 1000000 + MICROSECOND(%(rhs)s)))"
@@ -379,50 +383,19 @@ class DatabaseOperations(BaseDatabaseOperations):
         analyze = options.pop("analyze", False)
         prefix = super().explain_query_prefix(format, **options)
         if analyze and self.connection.features.supports_explain_analyze:
-            # MariaDB uses ANALYZE instead of EXPLAIN ANALYZE.
-            prefix = (
-                "ANALYZE" if self.connection.mysql_is_mariadb else prefix + " ANALYZE"
-            )
-        if format and not (analyze and not self.connection.mysql_is_mariadb):
-            # Only MariaDB supports the analyze option with formats.
+            prefix += " ANALYZE"
+        if format and not analyze:
             prefix += " FORMAT=%s" % format
         return prefix
 
     def regex_lookup(self, lookup_type):
-        # REGEXP BINARY doesn't work correctly in MySQL 8+ and REGEXP_LIKE
-        # doesn't exist in MySQL 5.x or in MariaDB.
-        if (
-            self.connection.mysql_version < (8, 0, 0)
-            or self.connection.mysql_is_mariadb
-        ):
-            if lookup_type == "regex":
-                return "%s REGEXP BINARY %s"
-            return "%s REGEXP %s"
-
         match_option = "c" if lookup_type == "regex" else "i"
-        return "REGEXP_LIKE(%%s, %%s, '%s')" % match_option
+        return "REGEXP_INSTR(%%s, %%s, 1, 1, 0, '%s')" % match_option
 
     def insert_statement(self, on_conflict=None):
         if on_conflict == OnConflict.IGNORE:
             return "INSERT IGNORE INTO"
         return super().insert_statement(on_conflict=on_conflict)
-
-    def lookup_cast(self, lookup_type, internal_type=None):
-        lookup = "%s"
-        if internal_type == "JSONField":
-            if self.connection.mysql_is_mariadb or lookup_type in (
-                "iexact",
-                "contains",
-                "icontains",
-                "startswith",
-                "istartswith",
-                "endswith",
-                "iendswith",
-                "regex",
-                "iregex",
-            ):
-                lookup = "JSON_UNQUOTE(%s)"
-        return lookup
 
     def conditional_expression_supported_in_where_clause(self, expression):
         # MySQL ignores indexes with boolean fields unless they're compared
@@ -440,18 +413,7 @@ class DatabaseOperations(BaseDatabaseOperations):
     def on_conflict_suffix_sql(self, fields, on_conflict, update_fields, unique_fields):
         if on_conflict == OnConflict.UPDATE:
             conflict_suffix_sql = "ON DUPLICATE KEY UPDATE %(fields)s"
-            # The use of VALUES() is deprecated in MySQL 8.0.20+. Instead, use
-            # aliases for the new row and its columns available in MySQL
-            # 8.0.19+.
-            if not self.connection.mysql_is_mariadb:
-                if self.connection.mysql_version >= (8, 0, 19):
-                    conflict_suffix_sql = f"AS new {conflict_suffix_sql}"
-                    field_sql = "%(field)s = new.%(field)s"
-                else:
-                    field_sql = "%(field)s = VALUES(%(field)s)"
-            # Use VALUE() on MariaDB.
-            else:
-                field_sql = "%(field)s = VALUE(%(field)s)"
+            field_sql = "%(field)s = VALUES(%(field)s)"
 
             fields = ", ".join(
                 [
@@ -466,3 +428,10 @@ class DatabaseOperations(BaseDatabaseOperations):
             update_fields,
             unique_fields,
         )
+
+    def convert_durationfield_value(self, value, expression, connection):
+        # Snowflake sometimes returns Decimal which is an unsupported type for
+        # timedelta microseconds component.
+        if isinstance(value, decimal.Decimal):
+            value = float(value)
+        return super().convert_durationfield_value(value, expression, connection)

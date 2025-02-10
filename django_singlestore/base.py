@@ -1,8 +1,3 @@
-"""
-MySQL database backend for Django.
-
-Requires mysqlclient: https://pypi.org/project/mysqlclient/
-"""
 from django.core.exceptions import ImproperlyConfigured
 from django.db import IntegrityError
 from django.db.backends import utils as backend_utils
@@ -12,16 +7,15 @@ from django.utils.functional import cached_property
 from django.utils.regex_helper import _lazy_re_compile
 
 try:
-    import MySQLdb as Database
+    import singlestoredb as s2
 except ImportError as err:
     raise ImproperlyConfigured(
-        "Error loading MySQLdb module.\nDid you install mysqlclient?"
+        "Error loading singlestoredb module.\nDid you install singlestoredb?"
     ) from err
 
-from MySQLdb.constants import CLIENT, FIELD_TYPE
-from MySQLdb.converters import conversions
+from singlestoredb.mysql.constants import FIELD_TYPE
+from singlestoredb.mysql.converters import conversions
 
-# Some of these import MySQLdb, so import them after checking if it's installed.
 from .client import DatabaseClient
 from .creation import DatabaseCreation
 from .features import DatabaseFeatures
@@ -29,13 +23,6 @@ from .introspection import DatabaseIntrospection
 from .operations import DatabaseOperations
 from .schema import DatabaseSchemaEditor
 from .validation import DatabaseValidation
-
-version = Database.version_info
-if version < (1, 4, 0):
-    raise ImproperlyConfigured(
-        "mysqlclient 1.4.0 or newer is required; you have %s." % Database.__version__
-    )
-
 
 # MySQLdb returns TIME columns as timedelta -- they are more like timedelta in
 # terms of actual behavior as they are signed and include days -- and Django
@@ -73,7 +60,7 @@ class CursorWrapper:
         try:
             # args is None means no string interpolation
             return self.cursor.execute(query, args)
-        except Database.OperationalError as e:
+        except s2.OperationalError as e:
             # Map some error codes to IntegrityError, since they seem to be
             # misclassified and Django would prefer the more logical place.
             if e.args[0] in self.codes_for_integrityerror:
@@ -83,7 +70,7 @@ class CursorWrapper:
     def executemany(self, query, args):
         try:
             return self.cursor.executemany(query, args)
-        except Database.OperationalError as e:
+        except s2.OperationalError as e:
             # Map some error codes to IntegrityError, since they seem to be
             # misclassified and Django would prefer the more logical place.
             if e.args[0] in self.codes_for_integrityerror:
@@ -98,7 +85,7 @@ class CursorWrapper:
 
 
 class DatabaseWrapper(BaseDatabaseWrapper):
-    vendor = "mysql"
+    vendor = "singlestore"
     # This dictionary maps Field objects to their associated MySQL column
     # types, as strings. Column-type strings can contain format strings; they'll
     # be interpolated against the values of Field.__dict__ before being output.
@@ -132,23 +119,6 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         "TimeField": "time(6)",
         "UUIDField": "char(32)",
     }
-
-    # For these data types:
-    # - MySQL < 8.0.13 doesn't accept default values and implicitly treats them
-    #   as nullable
-    # - all versions of MySQL and MariaDB don't support full width database
-    #   indexes
-    _limited_data_types = (
-        "tinyblob",
-        "blob",
-        "mediumblob",
-        "longblob",
-        "tinytext",
-        "text",
-        "mediumtext",
-        "longtext",
-        "json",
-    )
 
     operators = {
         "exact": "= %s",
@@ -184,13 +154,10 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     }
 
     isolation_levels = {
-        "read uncommitted",
         "read committed",
-        "repeatable read",
-        "serializable",
     }
 
-    Database = Database
+    Database = s2
     SchemaEditorClass = DatabaseSchemaEditor
     # Classes instantiated in __init__().
     client_class = DatabaseClient
@@ -201,12 +168,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     validation_class = DatabaseValidation
 
     def get_database_version(self):
-        return self.mysql_version
+        return self.s2_version
 
     def get_connection_params(self):
         kwargs = {
             "conv": django_conversions,
-            "charset": "utf8",
         }
         settings_dict = self.settings_dict
         if settings_dict["USER"]:
@@ -223,7 +189,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             kwargs["port"] = int(settings_dict["PORT"])
         # We need the number of potentially affected rows after an
         # "UPDATE", not the number of changed rows.
-        kwargs["client_flag"] = CLIENT.FOUND_ROWS
+        kwargs["client_found_rows"] = True
+        kwargs["parse_json"] = False
+        kwargs["conn_attrs"] = {"_connector_name": "SingleStore Django Connector"}
         # Validate the transaction isolation level, if specified.
         options = settings_dict["OPTIONS"].copy()
         isolation_level = options.pop("isolation_level", "read committed")
@@ -244,30 +212,17 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     @async_unsafe
     def get_new_connection(self, conn_params):
-        connection = Database.connect(**conn_params)
-        # bytes encoder in mysqlclient doesn't work and was added only to
-        # prevent KeyErrors in Django < 2.0. We can remove this workaround when
-        # mysqlclient 2.1 becomes the minimal mysqlclient supported by Django.
-        # See https://github.com/PyMySQL/mysqlclient/issues/489
-        if connection.encoders.get(bytes) is bytes:
-            connection.encoders.pop(bytes)
-        return connection
+        return s2.connect(**conn_params)
 
     def init_connection_state(self):
         super().init_connection_state()
         assignments = []
-        if self.features.is_sql_auto_is_null_enabled:
-            # SQL_AUTO_IS_NULL controls whether an AUTO_INCREMENT column on
-            # a recently inserted row will return when the field is tested
-            # for NULL. Disabling this brings this aspect of MySQL in line
-            # with SQL standards.
-            assignments.append("SET SQL_AUTO_IS_NULL = 0")
 
-        if self.isolation_level:
-            assignments.append(
-                "SET SESSION TRANSACTION ISOLATION LEVEL %s"
-                % self.isolation_level.upper()
-            )
+        # if self.isolation_level:
+        #     assignments.append(
+        #         "SET SESSION TRANSACTION ISOLATION LEVEL %s"
+        #         % self.isolation_level.upper()
+        #     )
 
         if assignments:
             with self.cursor() as cursor:
@@ -278,38 +233,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         cursor = self.connection.cursor()
         return CursorWrapper(cursor)
 
-    def _rollback(self):
-        try:
-            BaseDatabaseWrapper._rollback(self)
-        except Database.NotSupportedError:
-            pass
-
     def _set_autocommit(self, autocommit):
         with self.wrap_database_errors:
             self.connection.autocommit(autocommit)
-
-    def disable_constraint_checking(self):
-        """
-        Disable foreign key checks, primarily for use in adding rows with
-        forward references. Always return True to indicate constraint checks
-        need to be re-enabled.
-        """
-        with self.cursor() as cursor:
-            cursor.execute("SET foreign_key_checks=0")
-        return True
-
-    def enable_constraint_checking(self):
-        """
-        Re-enable foreign key checks after they have been disabled.
-        """
-        # Override needs_rollback in case constraint_checks_disabled is
-        # nested inside transaction.atomic.
-        self.needs_rollback, needs_rollback = False, self.needs_rollback
-        try:
-            with self.cursor() as cursor:
-                cursor.execute("SET foreign_key_checks=1")
-        finally:
-            self.needs_rollback = needs_rollback
 
     def check_constraints(self, table_names=None):
         """
@@ -370,43 +296,27 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     def is_usable(self):
         try:
             self.connection.ping()
-        except Database.Error:
+        except s2.Error:
             return False
         else:
             return True
 
     @cached_property
     def display_name(self):
-        return "MariaDB" if self.mysql_is_mariadb else "MySQL"
+        return "SingleStore"
 
     @cached_property
-    def data_type_check_constraints(self):
-        if self.features.supports_column_check_constraints:
-            check_constraints = {
-                "PositiveBigIntegerField": "`%(column)s` >= 0",
-                "PositiveIntegerField": "`%(column)s` >= 0",
-                "PositiveSmallIntegerField": "`%(column)s` >= 0",
-            }
-            if self.mysql_is_mariadb and self.mysql_version < (10, 4, 3):
-                # MariaDB < 10.4.3 doesn't automatically use the JSON_VALID as
-                # a check constraint.
-                check_constraints["JSONField"] = "JSON_VALID(`%(column)s`)"
-            return check_constraints
-        return {}
-
-    @cached_property
-    def mysql_server_data(self):
+    def singlestore_server_data(self):
         with self.temporary_connection() as cursor:
             # Select some server variables and test if the time zone
             # definitions are installed. CONVERT_TZ returns NULL if 'UTC'
             # timezone isn't loaded into the mysql.time_zone table.
             cursor.execute(
                 """
-                SELECT VERSION(),
+                SELECT @@memsql_version,
                        @@sql_mode,
-                       @@default_storage_engine,
-                       @@sql_auto_is_null,
-                       @@lower_case_table_names,
+                       @@default_table_type,
+                       @@table_name_case_sensitivity,
                        CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
             """
             )
@@ -414,31 +324,26 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         return {
             "version": row[0],
             "sql_mode": row[1],
-            "default_storage_engine": row[2],
-            "sql_auto_is_null": bool(row[3]),
-            "lower_case_table_names": bool(row[4]),
-            "has_zoneinfo_database": bool(row[5]),
+            "default_table_type": row[2],
+            "table_name_case_sensitivity": bool(row[3]),
+            "has_zoneinfo_database": bool(row[4]),
         }
 
     @cached_property
-    def mysql_server_info(self):
-        return self.mysql_server_data["version"]
+    def s2_server_info(self):
+        return self.singlestore_server_data["version"]
 
     @cached_property
-    def mysql_version(self):
-        match = server_version_re.match(self.mysql_server_info)
+    def s2_version(self):
+        match = server_version_re.match(self.s2_server_info)
         if not match:
             raise Exception(
                 "Unable to determine MySQL version from version string %r"
-                % self.mysql_server_info
+                % self.s2_server_info
             )
         return tuple(int(x) for x in match.groups())
 
     @cached_property
-    def mysql_is_mariadb(self):
-        return "mariadb" in self.mysql_server_info.lower()
-
-    @cached_property
     def sql_mode(self):
-        sql_mode = self.mysql_server_data["sql_mode"]
+        sql_mode = self.singlestore_server_data["sql_mode"]
         return set(sql_mode.split(",") if sql_mode else ())
