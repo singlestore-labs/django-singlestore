@@ -110,6 +110,10 @@ Note that the `through` table does not have a primary key column, so some django
 - ALTER TABLE which adds unique/primary/foreign index is not supported on a columnstore table.
 - SingleStore does not support altering of the primary key.
 - Changing table comments is not supported.
+- Nested transactions (savepoints) are not supported by SingleStore.
+- There is no implicit order by id when running `SELECT * FROM table`.
+
+There may be more limitations (and fixes) as the test suite that comes with django is still being processed.
 
 ## Resources
 
