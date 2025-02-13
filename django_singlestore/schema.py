@@ -104,10 +104,10 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             result_sql_parts.append("NULL")
         if field.primary_key:
             result_sql_parts.append("PRIMARY KEY")
-        # if NOT_ENFORCED_UNIQUE env variable is set, we don't enforce unique constraints.
+        # if DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE env variable is set, we don't enforce unique constraints.
         # This is needed to create test tables that must have more than one unique field which
         # is not allowed in SingleStore distributed tables
-        elif field.unique and os.getenv('NOT_ENFORCED_UNIQUE') is None:
+        elif field.unique and os.getenv('DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE') is None:
             result_sql_parts.append("UNIQUE")
 
         return " ".join(result_sql_parts), []
@@ -117,7 +117,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # Create column SQL, add FK deferreds if needed.
         column_sqls = []
         params = []
-        table_storage_type = os.getenv("TABLE_STORAGE_TYPE_" + model._meta.app_label.upper(), "")
+        table_storage_type = os.getenv(" DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_" + model._meta.app_label.upper(), "")
 
         for manager in model._meta.local_managers:
             # if storage type is specified for the model, we use it
@@ -181,7 +181,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                     # we must have the unique field as the shard key. Each django model has a field
                     # designated as a primary key, so it must be the shard key as well
                     additional_keys.append(f"SHARD KEY ({self.quote_name(field.column)})")
-                elif field.unique and os.getenv('NOT_ENFORCED_UNIQUE') is not None:
+                elif field.unique and os.getenv('DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE') is not None:
                     additional_keys.append(f"UNIQUE KEY({self.quote_name(field.column)}) UNENFORCED RELY")
         for field_names in model._meta.unique_together:
             fields = [model._meta.get_field(field) for field in field_names]
