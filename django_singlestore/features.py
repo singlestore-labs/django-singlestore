@@ -430,6 +430,11 @@ scalar subselect references field belonging to outer select that is more than on
                 "aggregation.test_filter_argument.FilteredAggregateTests.\
 test_filtered_aggregate_ref_multiple_subquery_annotation",
                 "queries.tests.ExcludeTests.test_subquery_exclude_outerref",
+                "expressions.tests.BasicExpressionsTests.test_annotation_with_deeply_nested_outerref",
+                "expressions.tests.BasicExpressionsTests.test_annotation_with_nested_outerref",
+                "expressions.tests.BasicExpressionsTests.test_nested_outerref_with_function",
+                "expressions.tests.BasicExpressionsTests.test_nested_subquery_outer_ref_2",
+                "expressions.tests.BasicExpressionsTests.test_nested_subquery_outer_ref_with_autofield",
             },
             "Feature 'scalar subselect inside the GROUP/ORDER BY of a pushed down query' is not supported \
 by SingleStore Distributed":
@@ -452,21 +457,26 @@ is not supported by SingleStore Distributed":
             {
                 "aggregation.tests.AggregateAnnotationPruningTests.test_referenced_composed_subquery_requires_wrapping",
                 "aggregation.tests.AggregateAnnotationPruningTests.test_referenced_subquery_requires_wrapping",
+                "expressions.tests.BasicExpressionsTests.test_annotation_with_outerref",
+                "expressions.tests.BasicExpressionsTests.test_case_in_filter_if_boolean_output_field",
+                "expressions.tests.BasicExpressionsTests.test_subquery_filter_by_aggregate",
             },
-            "The query cannot be executed. SingleStore does not support this type of query: nested scalar subselects \
-in project list":
+            "The query cannot be executed. SingleStore does not support this type of query: \
+nested scalar subselects in project list":
             {
                 "aggregation.tests.AggregateTestCase.test_aggregation_nested_subquery_outerref",
                 "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_in_subquery",
                 "queries.test_qs_combinators.QuerySetSetOperationTests.test_union_in_subquery_related_outerref",
             },
-            "The query cannot be executed. SingleStore does not support this type of query: correlated subselect \
-in ORDER BY":
+            "The query cannot be executed. SingleStore does not support this type of query: \
+correlated subselect in ORDER BY":
             {
                 "aggregation.tests.AggregateTestCase.test_aggregation_subquery_annotation_values_collision",
+                "expressions.tests.BasicExpressionsTests.test_annotations_within_subquery",
+                "expressions.tests.BasicExpressionsTests.test_order_by_exists",
             },
-            "The query cannot be executed. SingleStore does not support this type of query: correlated subselect \
-inside HAVING":
+            "The query cannot be executed. SingleStore does not support this type of query: \
+correlated subselect inside HAVING":
             {
                 "aggregation.tests.AggregateTestCase.test_filter_in_subquery_or_aggregation",
                 "annotations.tests.NonAggregateAnnotationTestCase.test_annotation_filter_with_subquery",
@@ -578,6 +588,10 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "SingleStore does not support altering of the primary key":
             {
                 "schema.tests.SchemaTests.test_primary_key",
+            },
+            "Feature 'select within values clause' is not supported by SingleStore":
+            {
+                "expressions.tests.BasicExpressionsTests.test_object_create_with_f_expression_in_subquery",
             },
         }
         return skips
