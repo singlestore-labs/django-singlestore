@@ -85,17 +85,6 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         Return a description of the table with the DB-API cursor.description
         interface."
         """
-        cursor.execute(
-            """
-            SELECT  table_collation
-            FROM    information_schema.tables
-            WHERE   table_schema = DATABASE()
-            AND     table_name = %s
-            """,
-            [table_name],
-        )
-        row = cursor.fetchone()
-        default_column_collation = row[0] if row else ""
         # information_schema database gives more accurate results for some figures:
         # - varchar length returned by cursor.description is an internal length,
         #   not visible length (#5725)
@@ -106,10 +95,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             SELECT
                 column_name, data_type, character_maximum_length,
                 numeric_precision, numeric_scale, extra, column_default,
-                CASE
-                    WHEN collation_name = %s THEN NULL
-                    ELSE collation_name
-                END AS collation_name,
+                collation_name,
                 CASE
                     WHEN column_type LIKE '%% unsigned' THEN 1
                     ELSE 0
@@ -118,7 +104,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             FROM information_schema.columns
             WHERE table_name = %s AND table_schema = DATABASE()
             """,
-            [default_column_collation, table_name],
+            [table_name],
         )
         field_info = {line[0]: InfoLine(*line) for line in cursor.fetchall()}
 
@@ -134,7 +120,8 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             info = field_info[line[0]]
             fields.append(
                 FieldInfo(
-                    *line[:3],
+                    *line[:2],
+                    line[2] or to_int(info.max_len),
                     to_int(info.max_len) or line[3],
                     to_int(info.num_prec) or line[4],
                     to_int(info.num_scale) or line[5],
