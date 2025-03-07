@@ -397,6 +397,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "fixtures_regress.tests.TestFixtures.test_loaddata_raises_error_when_fixture_has_invalid_foreign_key",
                 "model_fields.test_uuid.TestAsPrimaryKeyTransactionTests.test_unsaved_fk",
                 "transactions.tests.NonAutocommitTests.test_orm_query_after_error_and_rollback",
+                "inspectdb.tests.InspectDBTestCase.test_same_relations",
             },
             "SingleStore does not support FLOAT/DOUBLE primary keys on ColumnStore tables":
             {

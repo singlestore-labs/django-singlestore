@@ -199,26 +199,30 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         name_query = """
             SELECT kc.`constraint_name`, kc.`column_name`,
                 kc.`referenced_table_name`, kc.`referenced_column_name`,
-                c.`constraint_type`
+                c.`constraint_type`, cols.`column_key`
             FROM
                 information_schema.key_column_usage AS kc,
-                information_schema.table_constraints AS c
+                information_schema.table_constraints AS c,
+                information_schema.columns AS cols
             WHERE
                 kc.table_schema = DATABASE() AND
                 c.table_schema = kc.table_schema AND
                 c.table_name = kc.table_name AND
                 c.constraint_name = kc.constraint_name AND
                 c.constraint_type != 'CHECK' AND
-                kc.table_name = %s
+                kc.table_name = %s AND
+                cols.column_name = kc.column_name AND
+                cols.table_name = kc.table_name AND
+                cols.table_schema = kc.table_schema
             ORDER BY kc.`ordinal_position`
         """
         cursor.execute(name_query, [table_name])
-        for constraint, column, ref_table, ref_column, kind in cursor.fetchall():
+        for constraint, column, ref_table, ref_column, kind, column_key in cursor.fetchall():
             if constraint not in constraints:
                 constraints[constraint] = {
                     "columns": OrderedSet(),
-                    "primary_key": kind == "PRIMARY KEY",
-                    "unique": kind in {"PRIMARY KEY", "UNIQUE"},
+                    "primary_key": column_key == "PRI" or kind == "PRIMARY",
+                    "unique": column_key in {"PRI", "UNI"} or kind in {"PRIMARY", "UNIQUE"}, 
                     "index": False,
                     "check": False,
                     "foreign_key": (ref_table, ref_column) if ref_column else None,
