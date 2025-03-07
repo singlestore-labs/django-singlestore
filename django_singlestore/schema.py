@@ -117,7 +117,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         # Create column SQL, add FK deferreds if needed.
         column_sqls = []
         params = []
-        table_storage_type = os.getenv(" DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_" + model._meta.app_label.upper(), "")
+        table_storage_type = os.getenv("DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_" + model._meta.app_label.upper(), "")
 
         for manager in model._meta.local_managers:
             # if storage type is specified for the model, we use it
