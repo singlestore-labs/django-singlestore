@@ -192,11 +192,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     # What kind of error does the backend throw when accessing closed cursor?
     closed_cursor_error_class = ProgrammingError
 
-    # Does 'a' LIKE 'A' match?
-    has_case_insensitive_like = True
-
-    # Suffix for backends that don't support "SELECT xxx;" queries. SingleStore needs this for
-    # queries like `SELECT 1 WHERE 1` which need a FROM part
+    # Suffix for backends that don't support "SELECT xxx;" queries
+    # SingleStore needs this for queries like `SELECT 1 WHERE 1` which need a FROM part
     bare_select_suffix = " FROM DUAL"
 
     # If NULL is implied on columns without needing to be explicitly specified
@@ -592,6 +589,10 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "Feature 'select within values clause' is not supported by SingleStore":
             {
                 "expressions.tests.BasicExpressionsTests.test_object_create_with_f_expression_in_subquery",
+            },
+            "SingleStore does not support operations on INTERVAL expression":
+            {
+                "expressions.tests.FTimeDeltaTests.test_durationfield_multiply_divide",
             },
         }
         return skips

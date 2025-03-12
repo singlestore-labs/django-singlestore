@@ -68,23 +68,14 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def date_trunc_sql(self, lookup_type, sql, params, tzname=None):
         sql, params = self._convert_field_to_tz(sql, params, tzname)
-        fields = {
-            "year": "%Y-01-01",
-            "month": "%Y-%m-01",
-        }
-        if lookup_type in fields:
-            format_str = fields[lookup_type]
-            return f"(DATE_FORMAT({sql}, %s) :> DATE)", (*params, format_str)
-        elif lookup_type == "quarter":
-            return (
-                f"MAKEDATE(YEAR({sql}), 1) + "
-                f"INTERVAL QUARTER({sql}) QUARTER - INTERVAL 1 QUARTER",
-                (*params, *params),
-            )
-        elif lookup_type == "week":
-            return f"DATE_SUB({sql}, INTERVAL WEEKDAY({sql}) DAY)", (*params, *params)
-        else:
-            return f"DATE({sql})", params
+        if tzname:
+            sql = f"CONVERT_TZ({sql}, %s, 'UTC')"
+            params.append(tzname)
+
+        trunc_sql = f"DATE_TRUNC(%s, {sql})"
+        params.insert(0, lookup_type)
+
+        return trunc_sql, params
 
     def _prepare_tzname_delta(self, tzname):
         tzname, sign, offset = split_tzname_delta(tzname)
@@ -112,29 +103,24 @@ class DatabaseOperations(BaseDatabaseOperations):
         return self.date_extract_sql(lookup_type, sql, params)
 
     def datetime_trunc_sql(self, lookup_type, sql, params, tzname):
-        sql, params = self._convert_field_to_tz(sql, params, tzname)
-        fields = ["year", "month", "day", "hour", "minute", "second"]
-        format = ("%Y-", "%m", "-%d", " %H:", "%i", ":%s")
-        format_def = ("0000-", "01", "-01", " 00:", "00", ":00")
-        if lookup_type == "quarter":
-            return (
-                f"(DATE_FORMAT(MAKEDATE(YEAR({sql}), 1) + "
-                f"INTERVAL QUARTER({sql}) QUARTER - "
-                f"INTERVAL 1 QUARTER, %s) :> DATETIME)"
-            ), (*params, *params, "%Y-%m-01 00:00:00")
-        if lookup_type == "week":
-            return (
-                f"(DATE_FORMAT("
-                f"DATE_SUB({sql}, INTERVAL WEEKDAY({sql}) DAY), %s) :> DATETIME)"
-            ), (*params, *params, "%Y-%m-%d 00:00:00")
-        try:
-            i = fields.index(lookup_type) + 1
-        except ValueError:
-            pass
-        else:
-            format_str = "".join(format[:i] + format_def[i:])
-            return f"(DATE_FORMAT({sql}, %s) :> DATETIME)", (*params, format_str)
-        return sql, params
+        """
+        Generates SQL for truncating a datetime field to a specific precision.
+
+        lookup_type: 'year', 'month', 'day', 'hour', 'minute', 'second'.
+        sql: The SQL expression for the datetime field.
+        params: Parameters for the SQL expression.
+        tzname: The timezone in which to perform the truncation.
+        """
+        if tzname:
+            # Adjust the datetime field to the specified timezone
+            sql = f"CONVERT_TZ({sql}, %s, 'UTC')"
+            params.append(tzname)
+
+        # Use SingleStore's DATE_TRUNC function to truncate the datetime
+        trunc_sql = f"DATE_TRUNC(%s, {sql})"
+        params.insert(0, lookup_type)
+
+        return trunc_sql, params
 
     def time_trunc_sql(self, lookup_type, sql, params, tzname=None):
         sql, params = self._convert_field_to_tz(sql, params, tzname)
