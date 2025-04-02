@@ -39,9 +39,14 @@ There is a number of limitations when using SingleStore with Django, notably the
 
 SingleStore supports 4 different storage types for tables: COLUMNSTORE (default on most servers), ROWSTORE, REFERENCE, ROWSTORE REFERENCE.
 
-#### Major limitations
-- SingleStore does not enforce FOREIGN KEY constraints. The application must ensure referential integrity itself.
-- SingleStore does not support UNIQUE constraints on non-shard key columns in distributed tables. In particular, this means many-to-many intermediate tables (unless REFERENCE) in SingleStore must be built without id column, as they must have a unique constraint on `(column_from, column_to)`.
+### Major limitations
+SingleStore has several notable to differences compared to databases like Postres or MySQL which require certain design considerations and modifications to your apps.
+
+#### Lack of Foreign Keys
+SingleStore does not enforce FOREIGN KEY constraints. The application must ensure referential integrity itself.
+
+#### Unique Keys constraints 
+SingleStore does not support UNIQUE constraints on non-shard key columns in distributed tables. In particular, this means many-to-many intermediate tables (unless REFERENCE) in SingleStore must be built without id column, as they must have a unique constraint on `(column_from, column_to)`.
 
 To overcome the limitation on UNIQUE constraint, `django-singlestore` provides the following mechanisms.
 1. Use custom table storage type in django models. There are two ways to configure it:
@@ -93,9 +98,30 @@ CREATE TABLE `queries_paragraph_page` (
   KEY (`page_id`)
 );
 ```
-Note that the `through` table does not have a primary key column, so some django features may not work.
+Note that the `through` table does not have a primary key column, so some django features may not work. Also note that the result of `serialize` for this model will change.
 
-#### Minor limitations
+#### Writing to Reference tables
+If one choses to use REFERENCE tables for your models (which is necessary for default django apps), the following error will appear when using SingleStore Helios:
+
+```Writing to a reference table in multi-statement transaction is not permitted on child aggregators. Try the command again on the master aggregator.```
+
+To overcome this issue, one can disable transactions by skipping setting `AUTOCOMMIT` to `False`. This is done by setting the following environment variable before running migrations:
+
+```bash
+export DJANGO_SINGLESTORE_SKIP_AUTOCOMMIT=1
+```
+
+
+
+#### Notes
+- In a model, `OneToOneField` must have `primary_key=True`, otherwise the model must be materialized to a reference table. 
+- If one modifies the definition of an m2m field to include a `through` model, the result of `serialize` for this model will change: it won't include the related field values, because of how python Serializer is implemented:
+```
+def handle_m2m_field(self, obj, field):
+    if field.remote_field.through._meta.auto_created:
+```
+
+### Minor limitations
 - ALTER TABLE which modifies type of column is not supported on a columnstore table. A new column must be created, populated with data, and then dropped.
 - Certain query shapes are not supported, see the `django_test_skips` in `features.py` for the full list of the issues encountered in django tests.
 - SingleStore does not support FLOAT/DOUBLE primary keys on ColumnStore tables.

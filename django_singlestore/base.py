@@ -1,3 +1,4 @@
+import os
 from django.core.exceptions import ImproperlyConfigured
 from django.db import IntegrityError
 from django.db.backends import utils as backend_utils
@@ -234,6 +235,12 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         return CursorWrapper(cursor)
 
     def _set_autocommit(self, autocommit):
+        # skip setting autocommit to False if the environment variable is set.
+        # This is useful when calling bulk_create or bulk_update on a reference table,
+        # as it's not supported in a transaction unless Master Aggegator is used for connecting.
+        if os.getenv('DJANGO_SINGLESTORE_SKIP_AUTOCOMMIT'):
+            return
+
         with self.wrap_database_errors:
             self.connection.autocommit(autocommit)
 
