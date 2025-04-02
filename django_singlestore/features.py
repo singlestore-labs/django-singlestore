@@ -594,6 +594,28 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             {
                 "expressions.tests.FTimeDeltaTests.test_durationfield_multiply_divide",
             },
+            "SingleStore does not support years before 1000 in DATETIME fields":
+            {
+                "serializers.test_json.JsonSerializerTestCase.test_pre_1000ad_date",
+                "serializers.test_jsonl.JsonlSerializerTestCase.test_pre_1000ad_date",
+                "serializers.test_xml.XmlSerializerTestCase.test_pre_1000ad_date",
+                "serializers.test_yaml.YamlSerializerTestCase.test_pre_1000ad_date",
+            },
+            "Serializer doesn't serialize non-auto fields, this is django code:\
+            ```def handle_m2m_field(self, obj, field):\
+                if field.remote_field.through._meta.auto_created:```\
+            we changed some test models to have a through model, so m2m fields are not serialized":
+            {
+                "serializers.test_natural.NaturalKeySerializerTests.test_json_forward_references_m2m_errors",
+                "serializers.test_natural.NaturalKeySerializerTests.test_yaml_forward_references_m2m_errors",
+                "serializers.test_natural.NaturalKeySerializerTests.test_jsonl_forward_references_m2m_errors",
+                "serializers.test_natural.NaturalKeySerializerTests.test_python_forward_references_m2m_errors",
+                "serializers.test_natural.NaturalKeySerializerTests.test_xml_forward_references_m2m_errors",
+                "serializers.test_json.JsonSerializerTestCase.test_deterministic_mapping_ordering",
+                "serializers.test_jsonl.JsonlSerializerTestCase.test_deterministic_mapping_ordering",
+                "serializers.test_xml.XmlSerializerTestCase.test_deterministic_mapping_ordering",
+                "serializers.test_yaml.YamlSerializerTestCase.test_deterministic_mapping_ordering",  
+            },
         }
         return skips
 
