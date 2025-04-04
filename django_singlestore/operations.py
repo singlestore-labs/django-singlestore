@@ -70,10 +70,10 @@ class DatabaseOperations(BaseDatabaseOperations):
         sql, params = self._convert_field_to_tz(sql, params, tzname)
         if tzname:
             sql = f"CONVERT_TZ({sql}, %s, 'UTC')"
-            params.append(tzname)
+            params = (*params, tzname)
 
         trunc_sql = f"DATE_TRUNC(%s, {sql})"
-        params.insert(0, lookup_type)
+        params = (lookup_type, *params)
 
         return trunc_sql, params
 
@@ -114,11 +114,11 @@ class DatabaseOperations(BaseDatabaseOperations):
         if tzname:
             # Adjust the datetime field to the specified timezone
             sql = f"CONVERT_TZ({sql}, %s, 'UTC')"
-            params.append(tzname)
+            params = (*params, tzname)
 
         # Use SingleStore's DATE_TRUNC function to truncate the datetime
         trunc_sql = f"DATE_TRUNC(%s, {sql})"
-        params.insert(0, lookup_type)
+        params = (lookup_type, *params)
 
         return trunc_sql, params
 
