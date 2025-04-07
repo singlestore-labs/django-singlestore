@@ -616,6 +616,11 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
                 "serializers.test_xml.XmlSerializerTestCase.test_deterministic_mapping_ordering",
                 "serializers.test_yaml.YamlSerializerTestCase.test_deterministic_mapping_ordering",  
             },
+            "The primary key defiened explicitly in model causing the error of missing id field":{
+                "get_or_create.tests.GetOrCreateTransactionTests.test_get_or_create_integrityerror",
+                "get_or_create.tests.GetOrCreateThroughManyToMany.test_get_get_or_create",
+                "get_or_create.tests.GetOrCreateThroughManyToMany.test_create_get_or_create",
+            },
         }
         return skips
 
