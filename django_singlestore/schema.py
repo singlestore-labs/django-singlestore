@@ -104,10 +104,11 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             result_sql_parts.append("NULL")
         if field.primary_key:
             result_sql_parts.append("PRIMARY KEY")
-        # if DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE env variable is set, we don't enforce unique constraints.
+        # if DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_<APP_ANME> env variable is set, we don't enforce unique constraints
+        # on tables created for this app.
         # This is needed to create test tables that must have more than one unique field which
-        # is not allowed in SingleStore distributed tables
-        elif field.unique and os.getenv('DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE') is None:
+        # is not allowed in SingleStore distributed tables.
+        elif field.unique and os.getenv("DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_" + model._meta.app_label.upper()) is None:
             result_sql_parts.append("UNIQUE")
 
         return " ".join(result_sql_parts), []
@@ -181,7 +182,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                     # we must have the unique field as the shard key. Each django model has a field
                     # designated as a primary key, so it must be the shard key as well
                     additional_keys.append(f"SHARD KEY ({self.quote_name(field.column)})")
-                elif field.unique and os.getenv('DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE') is not None:
+                elif field.unique and os.getenv("DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_" + model._meta.app_label.upper()) is not None:
                     additional_keys.append(f"UNIQUE KEY({self.quote_name(field.column)}) UNENFORCED RELY")
         for field_names in model._meta.unique_together:
             fields = [model._meta.get_field(field) for field in field_names]

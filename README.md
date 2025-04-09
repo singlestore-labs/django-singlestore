@@ -69,7 +69,7 @@ To overcome the limitation on UNIQUE constraint, `django-singlestore` provides t
         def __str__(self):
             return self.name
     ```
-2. Do not materialize `unique` constraints defined in a model if environment variable `DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE` is set. This variable is intended to be used in testing only, as it obfuscates the lack of the unique constraint in the database from an application developer.
+2. Do not materialize `unique` constraints defined in a model if environment variable `DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_<APP_NAME>` is set. This variable is intended to be used in testing only, as it obfuscates the lack of the unique constraint in the database from an application developer.
 
 To overcome the limitation on unique constraints for many-to-many relationships, the following mechanism can be used: explicitly define an intermediary model (`through`) and use a custom DDL query to create it. Example:
 ```python
