@@ -653,6 +653,9 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "delete_regress.tests.Ticket19102Tests.test_ticket_19102_annotate",
             # we issue two queries instead of one, and 2 additional queries: BEGIN and COMMIT
             "many_to_many.tests.ManyToManyTests.test_fast_add_ignore_conflicts",
+            # TODO: PLAT-7420 after singlestoredb-python update these two should be fixed
+            "expressions.tests.ExpressionsTests.test_patterns_escape",
+            "expressions.tests.ExpressionsTests.test_insensitive_patterns_escape",
         }
 
         return fails
