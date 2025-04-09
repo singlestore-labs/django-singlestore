@@ -656,6 +656,10 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "queries.test_bulk_update.BulkUpdateNoteTests.test_foreign_keys_do_not_lookup",
             "queries.test_bulk_update.BulkUpdateNoteTests.test_batch_size",
             "model_inheritance.tests.ModelInheritanceDataTests.test_update_query_counts",
+            "update_only_fields.tests.UpdateOnlyFieldsTests.test_num_queries_inheritance",
+            "update_only_fields.tests.UpdateOnlyFieldsTests.test_update_fields_fk_defer",
+            "update_only_fields.tests.UpdateOnlyFieldsTests.test_update_fields_inheritance",
+            "update_only_fields.tests.UpdateOnlyFieldsTests.test_update_fields_inheritance_defer",
             # JSON_MATCH_ANY has different syntax so HasKeyLookup as_sql must be modified
             "queries.test_bulk_update.BulkUpdateTests.test_json_field",
             # other database for write is not respected during update TODO
