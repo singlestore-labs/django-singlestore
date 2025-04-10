@@ -128,7 +128,7 @@ def handle_m2m_field(self, obj, field):
 - ALTER TABLE which changes index `PRIMARY` is not supported on a columnstore table.
 - ALTER TABLE which drops shard index on sharded table is not supported on a columnstore table.
 - ALTER TABLE which modifies column by adding or dropping AUTO_INCREMENT is not supported on a columnstore table.
-- ALTER TABLE which resets the value of AUTO_INCREMENT is not supported by SingleStore Distributed.
+- ALTER TABLE that resets AUTO_INCREMENT value is not supported by SingleStore Distributed.
 - Feature 'Reference Table without a Primary Key' is not supported by SingleStore Distributed.
 - ALTER TABLE which modifies column from NULL to NOT NULL is not supported on a columnstore table.
 - A primary key cannot be added to a table after creation.
