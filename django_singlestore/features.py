@@ -638,6 +638,10 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
                 "get_or_create.tests.GetOrCreateThroughManyToMany.test_get_get_or_create",
                 "get_or_create.tests.GetOrCreateThroughManyToMany.test_create_get_or_create",
             },
+            "Feature 'ALTER TABLE...AUTO_INCREMENT=X for sharded tables' is not supported by SingleStore Distributed.":{
+                "test_runner.tests.AutoIncrementResetTest.test_autoincrement_reset1",
+                "test_runner.tests.AutoIncrementResetTest.test_autoincrement_reset2",
+            }
         }
         return skips
 
