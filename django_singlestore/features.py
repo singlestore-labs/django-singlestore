@@ -448,6 +448,7 @@ test_annotation_subquery_and_aggregate_values_chaining",
             {
                 "aggregation.tests.AggregateTestCase.test_values_annotation_with_expression",
                 "aggregation.test_filter_argument.FilteredAggregateTests.test_filtered_aggregate_on_exists",
+                "expressions_case.tests.CaseExpressionTests.test_annotate_with_in_clause",
             },
             "Feature 'Correlated subselect that can not be transformed and does not match on shard keys' \
 is not supported by SingleStore Distributed":
