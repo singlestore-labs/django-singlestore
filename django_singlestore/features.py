@@ -665,6 +665,9 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "update_only_fields.tests.UpdateOnlyFieldsTests.test_update_fields_inheritance",
             "update_only_fields.tests.UpdateOnlyFieldsTests.test_update_fields_inheritance_defer",
             "contenttypes_tests.test_order_with_respect_to.OrderWithRespectToGFKTests.test_database_routing",
+            #AssertionError: 4 != 2 : 4 queries executed, 2 expected
+            #similar to previous one having BEGIN and COMMIT
+            "generic_relations.tests.GenericRelationsTests.test_add_bulk_false",
             # JSON_MATCH_ANY has different syntax so HasKeyLookup as_sql must be modified
             "queries.test_bulk_update.BulkUpdateTests.test_json_field",
             # other database for write is not respected during update TODO
