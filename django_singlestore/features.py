@@ -301,8 +301,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     can_introspect_json_field = True
     # Does the backend support primitives in JSONField?
     supports_primitives_in_json_field = True
-    # Is there a true datatype for JSON?
-    has_native_json_field = True
+    # has_native_json_field has some cryptic meaning in django, and django
+    # generates better sql for SingleStore if has_native_json_field is set to False 
+    has_native_json_field = False
     # Does the backend use PostgreSQL-style JSON operators like '->'?
     has_json_operators = False
     # Does the backend support __contains and __contained_by lookups for

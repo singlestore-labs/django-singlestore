@@ -1,5 +1,8 @@
+import json
+
+from django.db.models import Lookup
 from django.db.models.fields import TextField
-from django.db.models.fields.json import HasKeyLookup, KeyTransform
+from django.db.models.fields.json import HasKeyLookup, KeyTransform, KeyTransformExact
 
 from django.db.models.functions import Random, Cast, JSONObject, Repeat, RPad, Length
 
@@ -44,11 +47,55 @@ def json_extract(self, compiler, connection):
     return lhs, list(params) + all_params
 
 
-def json_key_lookup(self, compiler, connection):
-    return self.as_sql(
-        compiler, connection, template="JSON_MATCH_ANY_EXISTS(%s, %%s)"
-    )
-    
+def json_key_lookup(self, compiler, connection, template=None):
+    """
+    We construct the SQL query to check if a JSON key exists in the JSON object.
+    In SingleStore, we use the JSON_MATCH_ANY_EXISTS function:
+    JSON_MATCH_ANY_EXISTS(json_object, key_1, key_2, ..., key_n)
+    """
+    # Process JSON path from the left-hand side.
+    lhs_key_params = []
+    if isinstance(self.lhs, KeyTransform):
+        lhs, lhs_params, lhs_key_transforms = self.lhs.preprocess_lhs(
+            compiler, connection
+        )
+        for key in lhs_key_transforms:
+            lhs_key_params.append(key)
+    else:
+        lhs, lhs_params = self.process_lhs(compiler, connection)
+
+    # Process JSON path from the right-hand side.
+    rhs = self.rhs
+    rhs_key_params = []
+    if not isinstance(rhs, (list, tuple)):
+        rhs = [rhs]
+    for key in rhs:
+        if isinstance(key, KeyTransform):
+            *_, rhs_key_transforms = key.preprocess_lhs(compiler, connection)
+        else:
+            rhs_key_transforms = [key]
+        for k in rhs_key_transforms:
+            rhs_key_params.append(k)
+            
+    if not self.logical_operator:
+        sql = f"JSON_MATCH_ANY_EXISTS({lhs}, {','.join(['%s'] * (len(lhs_key_params) + len(rhs_key_params)))})"
+        return sql, list(lhs_params) + list(lhs_key_params) + list(rhs_key_params)
+
+    sql = f"JSON_MATCH_ANY_EXISTS({lhs}, {','.join(['%s'] * (len(lhs_key_params) + 1))})"
+    sql = f"({self.logical_operator.join([sql] * len(rhs_key_params))})"
+    all_params = list(lhs_params)
+    for k in rhs_key_params:
+        all_params.extend(lhs_key_params)
+        all_params.append(k)
+    return sql, all_params
+
+
+def json_exact(self, compiler, connection):    
+    rhs, _ = self.process_rhs(compiler, connection)
+    rhs = f"({rhs}) :> JSON"
+    return self.as_sql(compiler, connection)
+
+
 def repeat(self, compiler, connection, **extra_context):
     expression, number = self.source_expressions
     length = None if number is None else Length(expression) * number
@@ -62,4 +109,5 @@ def register_functions():
     JSONObject.as_singlestore = json_object
     HasKeyLookup.as_singlestore = json_key_lookup
     KeyTransform.as_singlestore = json_extract
+    KeyTransformExact.as_singlestore = json_exact
     Repeat.as_singlestore = repeat
