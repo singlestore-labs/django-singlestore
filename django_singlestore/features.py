@@ -687,6 +687,9 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             # TODO: PLAT-7420 after singlestoredb-python update these two should be fixed
             "expressions.tests.ExpressionsTests.test_patterns_escape",
             "expressions.tests.ExpressionsTests.test_insensitive_patterns_escape",
+            # test performs lookup <json_fieldd> IN [json_1, ..., json_n]. For it to work, the user must explicitly
+            # transform array elements to json field type. TODO: check if we can do this in the connector
+            "model_fields.test_jsonfield.TestQuerying.test_key_in",
         }
 
         return fails
