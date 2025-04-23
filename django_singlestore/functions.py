@@ -3,8 +3,7 @@ import json
 from django.db.models import Lookup
 from django.db.models.fields import TextField
 from django.db.models.fields.json import HasKeyLookup, KeyTransform, JSONExact, JSONField, \
-    JSONIContains, KeyTransformIExact, KeyTransformIContains, KeyTransformIStartsWith, \
-    KeyTransformIEndsWith, KeyTransformIRegex, KeyTransformTextLookupMixin, KeyTextTransform, KeyTransformExact
+    JSONIContains, KeyTextTransform
 
 from django.db.models.functions import Random, Cast, JSONObject, Repeat, RPad, Length
 
@@ -133,31 +132,6 @@ class JSONCaseInsensitiveMixinSingleStore:
 class JSONIContainsSingleStore(JSONCaseInsensitiveMixinSingleStore, JSONIContains):
     def as_singlestore(self, compiler, connection, **extra_context):
         return self.as_sql(compiler, connection, **extra_context)
-    
-
-# class KeyTransformIExactSingleStore(CaseInsensitiveMixinSingleStore, KeyTransformIExact):
-#     def as_singlestore(self, compiler, connection, **extra_context):
-#         return self.as_sql(compiler, connection, **extra_context)
-
-
-# class KeyTransformIContainsSingleStore(CaseInsensitiveMixinSingleStore, KeyTransformIContains):
-#     def as_singlestore(self, compiler, connection, **extra_context):
-#         return self.as_sql(compiler, connection, **extra_context)
-
-
-# class KeyTransformIStartsWithSingleStore(CaseInsensitiveMixinSingleStore, KeyTransformIStartsWith):
-#     def as_singlestore(self, compiler, connection, **extra_context):
-#         return self.as_sql(compiler, connection, **extra_context)
-
-
-# class KeyTransformIEndsWithSingleStore(CaseInsensitiveMixinSingleStore, KeyTransformIEndsWith):
-#     def as_singlestore(self, compiler, connection, **extra_context):
-#         return self.as_sql(compiler, connection, **extra_context)
-
-
-# class KeyTransformIRegexSingleStore(CaseInsensitiveMixinSingleStore, KeyTransformIRegex):
-#     def as_singlestore(self, compiler, connection, **extra_context):
-#         return self.as_sql(compiler, connection, **extra_context)
 
 
 def json_key_text_transform(self, compiler, connection):
@@ -180,16 +154,8 @@ def register_functions():
     HasKeyLookup.as_singlestore = json_key_lookup
     KeyTransform.as_singlestore = json_key_extract
     KeyTextTransform.as_singlestore = json_key_text_transform
-    # KeyTransformExact.as_singlestore = json_key_transfrom_exact  # TODO: implement this
-
 
     KeyTransform.register_lookup(KeyTransformExactSingleStore)
 
     JSONField.register_lookup(JSONExactSingleStore)
     JSONField.register_lookup(JSONIContainsSingleStore)
-
-    # KeyTransform.register_lookup(KeyTransformIExactSingleStore)
-    # KeyTransform.register_lookup(KeyTransformIContainsSingleStore)
-    # KeyTransform.register_lookup(KeyTransformIStartsWithSingleStore)
-    # KeyTransform.register_lookup(KeyTransformIEndsWithSingleStore)
-    # KeyTransform.register_lookup(KeyTransformIRegexSingleStore)
