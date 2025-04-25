@@ -473,6 +473,7 @@ correlated subselect in ORDER BY":
                 "aggregation.tests.AggregateTestCase.test_aggregation_subquery_annotation_values_collision",
                 "expressions.tests.BasicExpressionsTests.test_annotations_within_subquery",
                 "expressions.tests.BasicExpressionsTests.test_order_by_exists",
+                "ordering.tests.OrderingTests.test_orders_nulls_first_on_filtered_subquery",
             },
             "The query cannot be executed. SingleStore does not support this type of query: \
 correlated subselect inside HAVING":
