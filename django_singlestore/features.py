@@ -693,8 +693,6 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             # test performs lookup <json_fieldd> IN [json_1, ..., json_n]. For it to work, the user must explicitly
             # transform array elements to json field type. TODO: check if we can do this in the connector
             "model_fields.test_jsonfield.TestQuerying.test_key_in",
-            # test has CAST object with CharField as output_field in the query, which is not giving correct result 
-            "aggregation_regress.tests.AggregationTests.test_aggregate_group_by_unseen_columns_unmanaged",
         }
 
         return fails
