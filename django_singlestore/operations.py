@@ -25,7 +25,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         "AutoField": "BIGINT",
         "BigAutoField": "BIGINT",
         "SmallAutoField": "BIGINT",
-        "CharField": "CHAR(%(max_length)s)",
+        "CharField": "VARCHAR(%(max_length)s)",
         "DecimalField": "DECIMAL(%(max_digits)s, %(decimal_places)s)",
         "TextField": "CHAR",
         "IntegerField": "INT",
@@ -36,7 +36,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         "PositiveSmallIntegerField": "UNSIGNED SMALLINT",
         "DurationField": "BIGINT",
     }
-    cast_char_field_without_max_length = "CHAR"
+    cast_char_field_without_max_length = "TEXT"
     explain_prefix = "EXPLAIN"
 
     # EXTRACT format cannot be passed in parameters.

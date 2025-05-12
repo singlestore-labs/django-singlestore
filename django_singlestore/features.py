@@ -444,6 +444,7 @@ by SingleStore Distributed":
                 "aggregation.tests.AggregateTestCase.test_group_by_subquery_annotation",
                 "annotations.tests.NonAggregateAnnotationTestCase.\
 test_annotation_subquery_and_aggregate_values_chaining",
+                "aggregation_regress.tests.AggregationTests.test_annotate_with_extra"
             },
             "Feature 'Subselect in aggregate functions' is not supported by SingleStore":
             {
@@ -480,6 +481,7 @@ correlated subselect inside HAVING":
             {
                 "aggregation.tests.AggregateTestCase.test_filter_in_subquery_or_aggregation",
                 "annotations.tests.NonAggregateAnnotationTestCase.test_annotation_filter_with_subquery",
+                "aggregation_regress.tests.AggregationTests.test_having_subquery_select",
             },
             "Feature 'Correlated subselect in the project list of a columnstore query with an ORDER BY, GROUP BY,\
 or DISTINCT' is not supported by SingleStore":
