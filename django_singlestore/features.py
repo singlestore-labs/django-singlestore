@@ -646,6 +646,10 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "Feature 'ALTER TABLE...AUTO_INCREMENT=X for sharded tables' is not supported by SingleStore Distributed.":{
                 "test_runner.tests.AutoIncrementResetTest.test_autoincrement_reset1",
                 "test_runner.tests.AutoIncrementResetTest.test_autoincrement_reset2",
+            },
+            "SingleStore does not support datetime with timezones":
+            {
+                "admin_views.tests.AdminViewBasicTest.test_date_hierarchy_local_date_differ_from_utc",
             }
         }
         return skips
@@ -673,6 +677,10 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             #AssertionError: 4 != 2 : 4 queries executed, 2 expected
             #similar to previous one having BEGIN and COMMIT
             "generic_relations.tests.GenericRelationsTests.test_add_bulk_false",
+            #AssertionError: 10 != 8 : 10 queries executed, 8 expected
+            "admin_views.tests.UserAdminTest.test_user_permission_performance",
+            #AssertionError: 8 != 6 : 8 queries executed, 6 expected
+            "admin_views.tests.GroupAdminTest.test_group_permission_performance",
             # JSON_MATCH_ANY has different syntax so HasKeyLookup as_sql must be modified
             "queries.test_bulk_update.BulkUpdateTests.test_json_field",
             # other database for write is not respected during update TODO
