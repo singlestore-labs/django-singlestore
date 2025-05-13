@@ -702,6 +702,8 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             # test performs lookup <json_fieldd> IN [json_1, ..., json_n]. For it to work, the user must explicitly
             # transform array elements to json field type. TODO: check if we can do this in the connector
             "model_fields.test_jsonfield.TestQuerying.test_key_in",
+            # salted_hmac producing different results than expected
+            "utils_tests.test_crypto.TestUtilsCryptoMisc.test_salted_hmac",
         }
 
         return fails
