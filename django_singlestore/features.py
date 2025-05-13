@@ -586,6 +586,7 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "SingleStore does not support order in indexes":
             {
                 "schema.tests.SchemaTests.test_order_index",
+                "generic_relations_regress.tests.GenericRelationTests.test_ticket_20378",
             },
             "SingleStore does not support altering of the primary key":
             {
