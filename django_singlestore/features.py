@@ -710,8 +710,6 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             # Auto increment fields must have BIGINT data type . default is BigAutoField
             "introspection.tests.IntrospectionTests.test_get_table_description_types",
             "introspection.tests.IntrospectionTests.test_smallautofield",
-            # Singlestore backend may handle transactions differently, causing diffrent error messages
-            "basic.tests.SelectOnSaveTests.test_select_on_save_lying_update",
         }
 
         return fails
