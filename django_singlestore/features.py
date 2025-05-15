@@ -706,6 +706,9 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "model_fields.test_jsonfield.TestQuerying.test_key_in",
             # salted_hmac producing different results than expected
             "utils_tests.test_crypto.TestUtilsCryptoMisc.test_salted_hmac",
+            # Auto increment fields must have BIGINT data type . default is BigAutoField
+            "introspection.tests.IntrospectionTests.test_get_table_description_types",
+            "introspection.tests.IntrospectionTests.test_smallautofield",
         }
 
         return fails
