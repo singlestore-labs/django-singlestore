@@ -488,10 +488,30 @@ or DISTINCT' is not supported by SingleStore":
             {
                 "annotations.tests.NonAggregateAnnotationTestCase.test_annotation_exists_aggregate_values_chaining",
             },
-            "Many-to-many intermediate tables (unless REFERENCE) in SingleStore must be built without id column":
+            "Many-to-many intermediate tables (unless REFERENCE) in SingleStore must be built without id column, \
+but certain django functionality requires id column to be present":
             {
                 "queries.tests.ExcludeTests.test_exclude_subquery",
                 "queries.tests.ExcludeTests.test_ticket14511",
+                "fixtures.tests.CircularReferenceTests.test_circular_reference_natural_key",
+                "fixtures.tests.CircularReferenceTests.test_circular_reference_natural_key",
+                "fixtures.tests.FixtureLoadingTests.test_dumpdata_progressbar",
+                "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_excludes",
+                "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_file_bz2_output",
+                "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_file_gzip_output",
+                "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_file_xz_output",
+                "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_file_zip_output",
+                "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_file_lzma_output",
+                "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_file_output",
+                "fixtures.tests.FixtureLoadingTests.test_dumpdata_with_filtering_manager",
+                "fixtures.tests.FixtureLoadingTests.test_dumpdata_proxy_with_concrete",
+                "fixtures.tests.FixtureLoadingTests.test_loading_and_dumping",
+                "fixtures.tests.FixtureLoadingTests.test_output_formats",
+                "fixtures.tests.ForwardReferenceTests.test_forward_reference_fk_natural_key",
+                "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m_natural_key",
+                "fixtures.tests.ForwardReferenceTests.test_forward_reference_fk",
+                "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m",
+                "fixtures.tests.CircularReferenceTests.test_circular_reference",
             },
             "LIMIT with UNION affects only the second part of the union":
             {
