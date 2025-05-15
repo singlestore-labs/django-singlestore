@@ -678,6 +678,7 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             #AssertionError: 4 != 2 : 4 queries executed, 2 expected
             #similar to previous one having BEGIN and COMMIT
             "generic_relations.tests.GenericRelationsTests.test_add_bulk_false",
+            "basic.tests.ModelInstanceCreationTests.test_save_parent_primary_with_default",
             #AssertionError: 10 != 8 : 10 queries executed, 8 expected
             "admin_views.tests.UserAdminTest.test_user_permission_performance",
             #AssertionError: 8 != 6 : 8 queries executed, 6 expected
@@ -709,6 +710,8 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             # Auto increment fields must have BIGINT data type . default is BigAutoField
             "introspection.tests.IntrospectionTests.test_get_table_description_types",
             "introspection.tests.IntrospectionTests.test_smallautofield",
+            # Singlestore backend may handle transactions differently, causing diffrent error messages
+            "basic.tests.SelectOnSaveTests.test_select_on_save_lying_update",
         }
 
         return fails
