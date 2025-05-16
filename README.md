@@ -139,6 +139,7 @@ def handle_m2m_field(self, obj, field):
 - Changing table comments is not supported.
 - Nested transactions (savepoints) are not supported by SingleStore.
 - There is no implicit order by id when running `SELECT * FROM table`.
+- `dumpdata` django command does not work if a table or a referenced m2m table does not have `id` column, which is the case for m2m tables created as suggested above (see `queries_paragraph_page` table definition).
 
 There may be more limitations (and fixes) as the test suite that comes with django is still being processed.
 
