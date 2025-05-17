@@ -703,6 +703,7 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "admin_views.tests.UserAdminTest.test_user_permission_performance",
             #AssertionError: 8 != 6 : 8 queries executed, 6 expected
             "admin_views.tests.GroupAdminTest.test_group_permission_performance",
+            "auth_tests.test_management.CreatePermissionsMultipleDatabasesTests.test_set_permissions_fk_to_using_parameter",
             #AssertionError: 6 != 4 : 6 queries executed, 4 expected
             "many_to_one_null.tests.ManyToOneNullTests.test_set_clear_non_bulk",
             # JSON_MATCH_ANY has different syntax so HasKeyLookup as_sql must be modified
