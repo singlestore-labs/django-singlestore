@@ -335,6 +335,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     # Does the backend support unlimited character columns?
     supports_unlimited_charfield = False
+
+    supports_update_conflicts_with_target = False
     
     @cached_property
     def introspected_field_types(self):
@@ -695,10 +697,14 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "update_only_fields.tests.UpdateOnlyFieldsTests.test_update_fields_inheritance",
             "update_only_fields.tests.UpdateOnlyFieldsTests.test_update_fields_inheritance_defer",
             "contenttypes_tests.test_order_with_respect_to.OrderWithRespectToGFKTests.test_database_routing",
+            "bulk_create.tests.BulkCreateTests.test_efficiency",
+            "bulk_create.tests.BulkCreateTests.test_explicit_batch_size_respects_max_batch_size",
+            "bulk_create.tests.BulkCreateTests.test_non_auto_increment_pk_efficiency",
             #AssertionError: 4 != 2 : 4 queries executed, 2 expected
             #similar to previous one having BEGIN and COMMIT
             "generic_relations.tests.GenericRelationsTests.test_add_bulk_false",
             "basic.tests.ModelInstanceCreationTests.test_save_parent_primary_with_default",
+            "bulk_create.tests.BulkCreateTests.test_explicit_batch_size_efficiency",
             #AssertionError: 10 != 8 : 10 queries executed, 8 expected
             "admin_views.tests.UserAdminTest.test_user_permission_performance",
             #AssertionError: 8 != 6 : 8 queries executed, 6 expected
