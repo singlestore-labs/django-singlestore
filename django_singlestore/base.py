@@ -302,7 +302,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     def is_usable(self):
         try:
-            self.connection.ping()
+            self.connection.ping(reconnect=False)
         except s2.Error:
             return False
         else:

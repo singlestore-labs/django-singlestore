@@ -121,7 +121,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_tablespaces = False
 
     # Does the backend reset sequences between tests?
-    supports_sequence_reset = True
+    supports_sequence_reset = False
 
     # Can the backend introspect the default value of a column?
     can_introspect_default = True
@@ -244,11 +244,6 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     # a type with time?
     time_cast_precision = 6
 
-    # SQL to create a procedure for use by the Django test suite. The
-    # functionality of the procedure isn't important.
-    create_test_procedure_without_params_sql = None
-    create_test_procedure_with_int_param_sql = None
-
     # SQL to create a table with a composite primary key for use by the Django
     # test suite.
     create_test_table_with_composite_primary_key = None
@@ -354,17 +349,17 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     create_test_procedure_without_params_sql = """
         CREATE PROCEDURE test_procedure ()
         AS
-        DECLARE V_I INTEGER;
+        DECLARE V_I INT = 0;
         BEGIN
-            SET V_I = 1;
+            V_I = 1;
         END;
     """
     create_test_procedure_with_int_param_sql = """
         CREATE PROCEDURE test_procedure (P_I INTEGER)
         AS
-        DECLARE V_I INTEGER;
+        DECLARE V_I INT = P_I;
         BEGIN
-            SET V_I = P_I;
+            V_I = V_I + 1;
         END;
     """
     create_test_table_with_composite_primary_key = """
@@ -514,6 +509,9 @@ but certain django functionality requires id column to be present":
                 "fixtures.tests.ForwardReferenceTests.test_forward_reference_fk",
                 "fixtures.tests.ForwardReferenceTests.test_forward_reference_m2m",
                 "fixtures.tests.CircularReferenceTests.test_circular_reference",
+                "backends.base.test_creation.TestDeserializeDbFromString.test_circular_reference_with_natural_key",
+                "backends.base.test_creation.TestDeserializeDbFromString.test_self_reference",
+                "backends.base.test_creation.TestDeserializeDbFromString.test_serialize_db_to_string_base_manager",
             },
             "LIMIT with UNION affects only the second part of the union":
             {
@@ -673,7 +671,12 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "SingleStore does not support datetime with timezones":
             {
                 "admin_views.tests.AdminViewBasicTest.test_date_hierarchy_local_date_differ_from_utc",
-            }
+            },
+            "SingleStore backend does not support iterators as arguments to executemany()":
+            {
+                "backends.tests.BackendTestCase.test_cursor_executemany_with_iterator",
+                "backends.tests.BackendTestCase.test_cursor_executemany_with_pyformat_iterator",
+            },
         }
         return skips
 
