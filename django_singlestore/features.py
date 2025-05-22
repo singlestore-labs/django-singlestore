@@ -707,7 +707,7 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "generic_relations.tests.GenericRelationsTests.test_add_bulk_false",
             "basic.tests.ModelInstanceCreationTests.test_save_parent_primary_with_default",
             "bulk_create.tests.BulkCreateTests.test_explicit_batch_size_efficiency",
-            "admin_views.tests.UserAdminTest.test_user_permission_performance"
+            "admin_views.tests.UserAdminTest.test_user_permission_performance",
             "admin_views.tests.GroupAdminTest.test_group_permission_performance",
             "auth_tests.test_management.CreatePermissionsMultipleDatabasesTests.test_set_permissions_fk_to_using_parameter",
             "many_to_one_null.tests.ManyToOneNullTests.test_set_clear_non_bulk",
