@@ -457,6 +457,7 @@ is not supported by SingleStore Distributed":
                 "expressions.tests.BasicExpressionsTests.test_annotation_with_outerref",
                 "expressions.tests.BasicExpressionsTests.test_case_in_filter_if_boolean_output_field",
                 "expressions.tests.BasicExpressionsTests.test_subquery_filter_by_aggregate",
+                "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_trunc_subquery_with_parameters",
             },
             "The query cannot be executed. SingleStore does not support this type of query: \
 nested scalar subselects in project list":
@@ -671,6 +672,32 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "SingleStore does not support datetime with timezones":
             {
                 "admin_views.tests.AdminViewBasicTest.test_date_hierarchy_local_date_differ_from_utc",
+                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_timezone_applied_before_truncation",
+                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_func_with_timezone",
+                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_ambiguous_and_invalid_times",
+                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_none",
+                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_iso_year_func_boundaries",
+                "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_iso_year_func_boundaries",
+                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_func_with_timezone",
+            },
+            "SingleStore doest not support the SHA224 hashing algorithm":
+            {
+                "db_functions.text.test_sha224.SHA224Tests.test_transform",
+                "db_functions.text.test_sha224.SHA224Tests.test_basic",
+            },
+            "SingleStore does not support UTF-8mb4 collations":
+            {
+                "db_functions.text.test_chr.ChrTests.test_non_ascii",
+            },
+            "SingleStore does not support datetime values before the year 1000":
+            {
+                "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_trunc_week_before_1000",
+                "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_trunc_func",
+            },
+            "SingleStore does not support the COLLATE clause in the ORDER BY statement":
+            {
+                "db_functions.comparison.test_collate.CollateTests.test_collate_order_by_cs",
+                "db_functions.comparison.test_collate.CollateTests.test_language_collation_order_by",
             },
             "SingleStore backend does not support iterators as arguments to executemany()":
             {
