@@ -5,7 +5,11 @@ from django.db.models.fields import TextField
 from django.db.models.fields.json import HasKeyLookup, KeyTransform, JSONExact, JSONField, \
     JSONIContains, KeyTextTransform
 
+from django.db.models.functions.text import SHA384,SHA256,SHA512,SHA1,Length,Chr
+from django.db.models.functions.datetime import Now
+
 from django.db.models.functions import Random, Cast, JSONObject, Repeat, RPad, Length
+from django.db.models.lookups import Transform
 
 
 def random(self, compiler, connection, **extra_context):
@@ -144,6 +148,43 @@ def json_key_text_transform(self, compiler, connection):
 
     return f"JSON_EXTRACT_STRING({lhs})", list(params) + all_params
 
+# def as_mysql(self, compiler, connection):
+#         if connection.mysql_is_mariadb:
+#             # MariaDB doesn't support -> and ->> operators (see MDEV-13594).
+#             sql, params = super().as_mysql(compiler, connection)
+#             return "JSON_UNQUOTE(%s)" % sql, params
+#         else:
+#             lhs, params, key_transforms = self.preprocess_lhs(compiler, connection)
+#             json_path = compile_json_path(key_transforms)
+#             return "(%s ->> %%s)" % lhs, tuple(params) + (json_path,)
+
+
+
+class SHASingleStore(Transform):
+    def as_singlestore(self, compiler, connection, **extra_context):
+        return self.as_sql(
+            compiler,
+            connection,
+            template="SHA2(%%(expressions)s, %s)" % self.function[3:],
+            **extra_context,
+        )
+class LengthSingleStore(Transform):
+    def as_singlestore(self, compiler, connection, **extra_context):
+        return Transform.as_sql(
+            self, compiler, connection, function="CHARACTER_LENGTH", **extra_context
+        )
+
+class NowSingleStore(Now):
+    def as_singlestore(self, compiler, connection, **extra_context):
+        return self.as_sql(
+            compiler, connection, template="CURRENT_TIMESTAMP(6)", **extra_context
+        )
+
+class ChrSingleStore(Transform):
+    def as_singlestore(self, compiler, connection, **extra_context):
+        return Transform.as_sql(self, compiler, connection, function="CHAR", **extra_context)
+
+
 
 def register_functions():
     Random.as_singlestore = random
@@ -154,6 +195,12 @@ def register_functions():
     HasKeyLookup.as_singlestore = json_key_lookup
     KeyTransform.as_singlestore = json_key_extract
     KeyTextTransform.as_singlestore = json_key_text_transform
+    SHA256.as_singlestore = SHASingleStore.as_singlestore
+    SHA512.as_singlestore = SHASingleStore.as_singlestore
+    SHA384.as_singlestore = SHASingleStore.as_singlestore
+    Length.as_singlestore = LengthSingleStore.as_singlestore
+    Now.as_singlestore = NowSingleStore.as_singlestore
+    Chr.as_singlestore = ChrSingleStore.as_singlestore
 
     KeyTransform.register_lookup(KeyTransformExactSingleStore)
 

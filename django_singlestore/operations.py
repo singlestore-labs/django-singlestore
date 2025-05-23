@@ -5,7 +5,7 @@ import uuid
 from django.conf import settings
 from django.db.backends.base.operations import BaseDatabaseOperations
 from django.db.backends.utils import split_tzname_delta
-from django.db.models import Exists, ExpressionWrapper, Lookup
+from django.db.models import Exists, ExpressionWrapper, Lookup, Func
 from django.db.models.constants import OnConflict
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime, parse_time
@@ -27,7 +27,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         "SmallAutoField": "BIGINT",
         "CharField": "VARCHAR(%(max_length)s)",
         "DecimalField": "DECIMAL(%(max_digits)s, %(decimal_places)s)",
-        "TextField": "CHAR",
+        "TextField": "TEXT",
         "IntegerField": "INT",
         "BigIntegerField": "BIGINT",
         "SmallIntegerField": "SMALLINT",
@@ -56,9 +56,12 @@ class DatabaseOperations(BaseDatabaseOperations):
             # Mode 3: Monday, 1-53, with 4 or more days this year.
             return f"WEEK({sql}, 3)", params
         elif lookup_type == "iso_year":
-            # Get the year part from the YEARWEEK function, which returns a
-            # number as year * 100 + week.
-            return f"TRUNCATE(YEARWEEK({sql}, 3), -2) / 100", params
+            # Custom SQL for extracting ISO year in SingleStore
+            return (
+            f"YEAR({sql}) - (WEEK({sql}, 3) = 0) + "
+            f"(WEEK({sql}, 3) = 53 AND WEEK(DATE_ADD({sql}, INTERVAL 1 YEAR), 3) = 1)",
+            params,
+        )
         else:
             # EXTRACT returns 1-53 based on ISO-8601 for the week number.
             lookup_type = lookup_type.upper()
