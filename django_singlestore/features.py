@@ -544,6 +544,9 @@ but certain django functionality requires id column to be present":
                 "schema.tests.SchemaTests.test_unique_together_with_fk",
                 "schema.tests.SchemaTests.test_unique_together_with_fk_with_existing_index",
                 "schema.tests.SchemaTests.test_alter_field_fk_to_o2o",
+                "migrations.test_operations.OperationTests.test_alter_field_reloads_state_on_fk_with_to_field_target_changes",
+                "migrations.test_operations.OperationTests.test_alter_unique_together",   #Using AlterUniqueTogether operation
+                "migrations.test_operations.OperationTests.test_create_model_with_unique_after"   #Using AlterUniqueTogether operation
             },
             "ALTER TABLE which drops shard index * on sharded table is not supported on a columnstore table.":
             {
@@ -555,10 +558,24 @@ columnstore table":
                 "schema.tests.SchemaTests.test_alter_auto_field_quoted_db_column",
                 "schema.tests.SchemaTests.test_alter_smallint_pk_to_smallautofield_pk",
                 "schema.tests.SchemaTests.test_char_field_pk_to_auto_field",
+                "migrations.test_operations.OperationTests.test_alter_field_pk_mti_fk",
+                "migrations.test_operations.OperationTests.test_alter_field_pk_mti_and_fk_to_base",
+                "migrations.test_operations.OperationTests.test_smallfield_bigautofield_foreignfield_growth",
+                "migrations.test_operations.OperationTests.test_smallfield_autofield_foreignfield_growth",
+                "migrations.test_operations.OperationTests.test_autofield__bigautofield_foreignfield_growth",
             },
             "ALTER TABLE which modifies type of column * is not supported on a columnstore table":
             {
                 "schema.tests.SchemaTests.test_alter_field_type_and_db_collation",
+                "migrations.test_operations.OperationTests.test_alter_fk_non_fk",
+                "migrations.test_operations.OperationTests.test_alter_field_with_index",
+                "migrations.test_operations.OperationTests.test_alter_field_with_func_unique_constraint",
+                "migrations.test_operations.OperationTests.test_alter_field_reloads_state_on_fk_target_changes",
+                "migrations.test_operations.OperationTests.test_alter_field_pk_fk_char_to_int",
+                "migrations.test_operations.OperationTests.test_alter_field_pk",
+                "migrations.test_operations.OperationTests.test_rename_field_reloads_state_on_fk_target_changes",
+                "migrations.test_executor.ExecutorTests.test_alter_id_type_with_fk",
+                "migrations.test_operations.OperationTests.test_alter_field"
             },
             "Feature 'Reference Table without a Primary Key' is not supported by SingleStore Distributed":
             {
@@ -592,13 +609,30 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
                 "schema.tests.SchemaTests.test_m2m_repoint",
                 "schema.tests.SchemaTests.test_m2m_repoint_custom",
                 "schema.tests.SchemaTests.test_m2m_repoint_inherited",
-                "schema.tests.SchemaTests.test_remove_unique_together_does_not_remove_meta_constraints"
+                "schema.tests.SchemaTests.test_remove_unique_together_does_not_remove_meta_constraints",
+                "migrations.test_operations.OperationTests.test_repoint_field_m2m",
+                "migrations.test_operations.OperationTests.test_rename_model_with_self_referential_m2m",
+                "migrations.test_operations.OperationTests.test_rename_model_with_m2m_models_in_different_apps_with_same_name",
+                "migrations.test_operations.OperationTests.test_rename_model_with_m2m",
+                "migrations.test_operations.OperationTests.test_rename_model_with_db_table_rename_m2m",
+                "migrations.test_operations.OperationTests.test_rename_m2m_target_model",
+                "migrations.test_operations.OperationTests.test_alter_model_table_m2m_field",
+                "migrations.test_operations.OperationTests.test_alter_model_table_m2m",
+                "migrations.test_operations.OperationTests.test_alter_index_together_remove_with_unique_together",
+                "migrations.test_operations.OperationTests.test_rename_m2m_model_after_rename_field",
+                "migrations.test_operations.OperationTests.test_rename_field_unique_together",
+                "migrations.test_operations.OperationTests.test_remove_field_m2m",
+                "migrations.test_executor.ExecutorTests.test_detect_soft_applied_add_field_manytomanyfield",
+                "migrations.test_operations.OperationTests.test_alter_field_m2m",
+                "migrations.test_operations.OperationTests.test_add_field_m2m",
             },
             "Feature 'Multiple HASH indices on the same columns' is not supported by SingleStore":
             {
                 "schema.tests.SchemaTests.test_remove_db_index_doesnt_remove_custom_indexes",
                 "schema.tests.SchemaTests.test_remove_field_unique_does_not_remove_meta_constraints",
                 "schema.tests.SchemaTests.test_remove_index_together_does_not_remove_meta_indexes",
+                "migrations.test_operations.OperationTests.test_remove_unique_together_on_pk_field",
+                "migrations.test_operations.OperationTests.test_remove_unique_together_on_unique_field",
             },
             "ALTER TABLE which adds unique/primary/foreign index * is not supported on a columnstore table":
             {
@@ -704,6 +738,10 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
                 "backends.tests.BackendTestCase.test_cursor_executemany_with_iterator",
                 "backends.tests.BackendTestCase.test_cursor_executemany_with_pyformat_iterator",
             },
+            "SingleStore does not support altering a Table comments":
+            {
+                "migrations.test_operations.OperationTests.test_remove_constraint",
+            }
         }
         return skips
 
