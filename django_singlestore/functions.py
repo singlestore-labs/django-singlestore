@@ -5,11 +5,12 @@ from django.db.models.fields import TextField
 from django.db.models.fields.json import HasKeyLookup, KeyTransform, JSONExact, JSONField, \
     JSONIContains, KeyTextTransform
 
-from django.db.models.functions.text import SHA384, SHA256, SHA512, Length, Chr
+from django.db.models.functions.text import SHA384, SHA256, SHA512, Length, Chr, ConcatPair
 from django.db.models.functions.datetime import Now
 
 from django.db.models.functions import Random, Cast, JSONObject, Repeat, RPad, Length
 from django.db.models.lookups import Transform
+from django.db.models.expressions import Func
 
 
 def random(self, compiler, connection, **extra_context):
@@ -178,6 +179,19 @@ class ChrSingleStore(Transform):
         return Transform.as_sql(self, compiler, connection, function="CHAR", **extra_context)
 
 
+class ConcatPairSingleStore(Func):
+    def as_singlestore(self, compiler, connection, **extra_context):
+        # Use CONCAT_WS with an empty separator so that NULLs are ignored.
+        return Func.as_sql(
+            self,
+            compiler,
+            connection,
+            function="CONCAT_WS",
+            template="%(function)s('', %(expressions)s)",
+            **extra_context,
+        )
+    
+
 def register_functions():
     Random.as_singlestore = random
     Cast.as_singlestore = cast
@@ -193,6 +207,7 @@ def register_functions():
     Length.as_singlestore = LengthSingleStore.as_singlestore
     Now.as_singlestore = NowSingleStore.as_singlestore
     Chr.as_singlestore = ChrSingleStore.as_singlestore
+    ConcatPair.as_singlestore = ConcatPairSingleStore.as_singlestore
 
     KeyTransform.register_lookup(KeyTransformExactSingleStore)
 
