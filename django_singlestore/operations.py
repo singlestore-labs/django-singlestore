@@ -31,9 +31,9 @@ class DatabaseOperations(BaseDatabaseOperations):
         "IntegerField": "INT",
         "BigIntegerField": "BIGINT",
         "SmallIntegerField": "SMALLINT",
-        "PositiveBigIntegerField": "UNSIGNED BIGINT",
-        "PositiveIntegerField": "UNSIGNED INT",
-        "PositiveSmallIntegerField": "UNSIGNED SMALLINT",
+        "PositiveBigIntegerField": "BIGINT UNSIGNED",
+        "PositiveIntegerField": "INT UNSIGNED",
+        "PositiveSmallIntegerField": "SMALLINT UNSIGNED",
         "DurationField": "BIGINT",
     }
     cast_char_field_without_max_length = "TEXT"
