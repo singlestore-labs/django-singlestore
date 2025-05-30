@@ -685,7 +685,7 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
                 "db_functions.text.test_sha224.SHA224Tests.test_transform",
                 "db_functions.text.test_sha224.SHA224Tests.test_basic",
             },
-            "SingleStore does not support UTF-8mb4 collations":
+            "SingleStore CHAR() function does not support non-ASCII code points for CHR":
             {
                 "db_functions.text.test_chr.ChrTests.test_non_ascii",
             },
