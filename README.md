@@ -135,6 +135,7 @@ def handle_m2m_field(self, obj, field):
 - Feature 'multiple UNIQUE indexes with at least one index containing multiple columns on columnstore table' is not supported by SingleStore.
 - Feature 'Multiple HASH indices on the same columns' is not supported by SingleStore.
 - ALTER TABLE which adds unique/primary/foreign index is not supported on a columnstore table.
+- ALTER TABLE which which modifies the table comment is not supported by SingleStore.
 - SingleStore does not support altering of the primary key.
 - Changing table comments is not supported.
 - Nested transactions (savepoints) are not supported by SingleStore.
