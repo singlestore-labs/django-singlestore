@@ -77,6 +77,6 @@ SKIPPED: 537
 
 ### Notes
 TODO: move this to README
-- the size of the list for `bulk_update` must be not greater than 900 if default `thread_stack` engine variable is used 
+- the size of the list for `bulk_update` must be not greater than 900 if default `thread_stack` engine variable is used
 - Explicit `ORDER BY` is needed to retrieve results in deterministic order, no implicit order by id in SingleStore
 - Alter field has a number of constraints - TODO: describe them in detail

@@ -35,7 +35,7 @@ class SQLDeleteCompiler(compiler.SQLDeleteCompiler, SQLCompiler):
             return super().as_sql()
         result = [
             "DELETE %s FROM"
-            % self.quote_name_unless_alias(self.query.get_initial_alias())
+            % self.quote_name_unless_alias(self.query.get_initial_alias()),
         ]
         from_sql, from_params = self.get_from_clause()
         result.extend(from_sql)

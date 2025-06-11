@@ -1,4 +1,5 @@
 import os
+
 from django.core.exceptions import ImproperlyConfigured
 from django.db import IntegrityError
 from django.db.backends import utils as backend_utils
@@ -11,7 +12,7 @@ try:
     import singlestoredb as s2
 except ImportError as err:
     raise ImproperlyConfigured(
-        "Error loading singlestoredb module.\nDid you install singlestoredb?"
+        "Error loading singlestoredb module.\nDid you install singlestoredb?",
     ) from err
 
 from singlestoredb.mysql.constants import FIELD_TYPE
@@ -205,7 +206,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                     % (
                         isolation_level,
                         ", ".join("'%s'" % s for s in sorted(self.isolation_levels)),
-                    )
+                    ),
                 )
         self.isolation_level = isolation_level
         kwargs.update(options)
@@ -257,7 +258,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 table_names = self.introspection.table_names(cursor)
             for table_name in table_names:
                 primary_key_column_name = self.introspection.get_primary_key_column(
-                    cursor, table_name
+                    cursor, table_name,
                 )
                 if not primary_key_column_name:
                     continue
@@ -282,7 +283,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                             referenced_column_name,
                             column_name,
                             referenced_column_name,
-                        )
+                        ),
                     )
                     for bad_row in cursor.fetchall():
                         raise IntegrityError(
@@ -297,7 +298,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                                 bad_row[1],
                                 referenced_table_name,
                                 referenced_column_name,
-                            )
+                            ),
                         )
 
     def is_usable(self):
@@ -325,7 +326,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                        @@default_table_type,
                        @@table_name_case_sensitivity,
                        CONVERT_TZ('2001-01-01 01:00:00', 'UTC', 'UTC') IS NOT NULL
-            """
+            """,
             )
             row = cursor.fetchone()
         return {
@@ -346,7 +347,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         if not match:
             raise Exception(
                 "Unable to determine MySQL version from version string %r"
-                % self.s2_server_info
+                % self.s2_server_info,
             )
         return tuple(int(x) for x in match.groups())
 

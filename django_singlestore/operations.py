@@ -5,10 +5,14 @@ import uuid
 from django.conf import settings
 from django.db.backends.base.operations import BaseDatabaseOperations
 from django.db.backends.utils import split_tzname_delta
-from django.db.models import Exists, ExpressionWrapper, Lookup, Func
+from django.db.models import Exists
+from django.db.models import ExpressionWrapper
+from django.db.models import Lookup
 from django.db.models.constants import OnConflict
 from django.utils import timezone
-from django.utils.dateparse import parse_date, parse_datetime, parse_time
+from django.utils.dateparse import parse_date
+from django.utils.dateparse import parse_datetime
+from django.utils.dateparse import parse_time
 from django.utils.encoding import force_str
 from django.utils.regex_helper import _lazy_re_compile
 
@@ -42,7 +46,7 @@ class DatabaseOperations(BaseDatabaseOperations):
     # EXTRACT format cannot be passed in parameters.
     _extract_format_re = _lazy_re_compile(r"[A-Z_]+")
 
-    #TODO: Verify that this is correct for SingleStore.
+    # TODO: Verify that this is correct for SingleStore.
     def date_extract_sql(self, lookup_type, sql, params):
         # https://dev.mysql.com/doc/mysql/en/date-and-time-functions.html
         if lookup_type == "week_day":
@@ -59,10 +63,10 @@ class DatabaseOperations(BaseDatabaseOperations):
         elif lookup_type == "iso_year":
             # Custom SQL for extracting ISO year in SingleStore
             return (
-            f"YEAR({sql}) - (WEEK({sql}, 3) = 0) + "
-            f"(WEEK({sql}, 3) = 53 AND WEEK(DATE_ADD({sql}, INTERVAL 1 YEAR), 3) = 1)",
-            params,
-        )
+                f"YEAR({sql}) - (WEEK({sql}, 3) = 0) + "
+                f"(WEEK({sql}, 3) = 53 AND WEEK(DATE_ADD({sql}, INTERVAL 1 YEAR), 3) = 1)",
+                params,
+            )
         else:
             # EXTRACT returns 1-53 based on ISO-8601 for the week number.
             lookup_type = lookup_type.upper()
@@ -237,7 +241,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         # NO_AUTO_VALUE_ON_ZERO SQL mode.
         if value == 0 and not self.connection.features.allows_auto_pk_0:
             raise ValueError(
-                "The database backend does not accept 0 as a value for AutoField."
+                "The database backend does not accept 0 as a value for AutoField.",
             )
         return value
 
@@ -256,7 +260,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             else:
                 raise ValueError(
                     "SingleStore backend does not support timezone-aware datetimes when "
-                    "USE_TZ is False."
+                    "USE_TZ is False.",
                 )
         return str(value)
 
@@ -356,7 +360,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                 "((TIME_TO_SEC(%(lhs)s) * 1000000 + MICROSECOND(%(lhs)s)) -"
                 " (TIME_TO_SEC(%(rhs)s) * 1000000 + MICROSECOND(%(rhs)s)))"
             ) % {"lhs": lhs_sql, "rhs": rhs_sql}, tuple(lhs_params) * 2 + tuple(
-                rhs_params
+                rhs_params,
             ) * 2
         params = (*rhs_params, *lhs_params)
         return "TIMESTAMPDIFF(MICROSECOND, %s, %s)" % (rhs_sql, lhs_sql), params
@@ -394,7 +398,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             return True
         if isinstance(expression, ExpressionWrapper) and expression.conditional:
             return self.conditional_expression_supported_in_where_clause(
-                expression.expression
+                expression.expression,
             )
         if getattr(expression, "conditional", False):
             return False
@@ -409,7 +413,7 @@ class DatabaseOperations(BaseDatabaseOperations):
                 [
                     field_sql % {"field": field}
                     for field in map(self.quote_name, update_fields)
-                ]
+                ],
             )
             return conflict_suffix_sql % {"fields": fields}
         return super().on_conflict_suffix_sql(

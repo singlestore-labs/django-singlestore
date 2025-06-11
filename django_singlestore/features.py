@@ -1,3 +1,6 @@
+from typing import Any
+from typing import List
+
 from django.db import ProgrammingError
 from django.db.backends.base.features import BaseDatabaseFeatures
 from django.utils.functional import cached_property
@@ -11,7 +14,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     allows_group_by_lob = True
     allows_group_by_selected_pks = False
     allows_group_by_select_index = True
-    empty_fetchmany_value = []
+    empty_fetchmany_value: List[Any] = []
     update_can_self_select = True
 
     # Does the backend distinguish between '' and None?
@@ -252,7 +255,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_callproc_kwargs = False
 
     # What formats does the backend EXPLAIN syntax support?
-    supported_explain_formats = set()
+    supported_explain_formats = {"JSON", ""}
 
     # Does the backend support the default parameter in lead() and lag()?
     supports_default_in_lead_lag = True
@@ -297,7 +300,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     # Does the backend support primitives in JSONField?
     supports_primitives_in_json_field = True
     # has_native_json_field has some cryptic meaning in django, and django
-    # generates better sql for SingleStore if has_native_json_field is set to False 
+    # generates better sql for SingleStore if has_native_json_field is set to False
     has_native_json_field = False
     # Does the backend use PostgreSQL-style JSON operators like '->'?
     has_json_operators = False
@@ -332,7 +335,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_unlimited_charfield = False
 
     supports_update_conflicts_with_target = False
-    
+
     @cached_property
     def introspected_field_types(self):
         return {
@@ -441,7 +444,7 @@ by SingleStore Distributed":
                 "aggregation.tests.AggregateTestCase.test_group_by_subquery_annotation",
                 "annotations.tests.NonAggregateAnnotationTestCase.\
 test_annotation_subquery_and_aggregate_values_chaining",
-                "aggregation_regress.tests.AggregationTests.test_annotate_with_extra"
+                "aggregation_regress.tests.AggregationTests.test_annotate_with_extra",
             },
             "Feature 'Subselect in aggregate functions' is not supported by SingleStore":
             {
@@ -544,9 +547,12 @@ but certain django functionality requires id column to be present":
                 "schema.tests.SchemaTests.test_unique_together_with_fk",
                 "schema.tests.SchemaTests.test_unique_together_with_fk_with_existing_index",
                 "schema.tests.SchemaTests.test_alter_field_fk_to_o2o",
-                "migrations.test_operations.OperationTests.test_alter_field_reloads_state_on_fk_with_to_field_target_changes",
-                "migrations.test_operations.OperationTests.test_alter_unique_together",   #Using AlterUniqueTogether operation
-                "migrations.test_operations.OperationTests.test_create_model_with_unique_after"   #Using AlterUniqueTogether operation
+                "migrations.test_operations.OperationTests." + \
+                "test_alter_field_reloads_state_on_fk_with_to_field_target_changes",
+                "migrations.test_operations.OperationTests.test_alter_unique_together",   # Using \
+                    # AlterUniqueTogether operation  # noqa: E131
+                "migrations.test_operations.OperationTests.test_create_model_with_unique_after",   # Using \
+                    # AlterUniqueTogether operation  # noqa: E131
             },
             "ALTER TABLE which drops shard index * on sharded table is not supported on a columnstore table.":
             {
@@ -575,7 +581,7 @@ columnstore table":
                 "migrations.test_operations.OperationTests.test_alter_field_pk",
                 "migrations.test_operations.OperationTests.test_rename_field_reloads_state_on_fk_target_changes",
                 "migrations.test_executor.ExecutorTests.test_alter_id_type_with_fk",
-                "migrations.test_operations.OperationTests.test_alter_field"
+                "migrations.test_operations.OperationTests.test_alter_field",
             },
             "Feature 'Reference Table without a Primary Key' is not supported by SingleStore Distributed":
             {
@@ -596,8 +602,9 @@ by SingleStore":
             {
                 "schema.tests.SchemaTests.test_indexes",
             },
+            # TODO: check if we can run these tests on reference tables using custom "through"
             "Feature 'multiple UNIQUE indexes with at least one index containing multiple columns on columnstore \
-table' is not supported by SingleStore":  # TODO: check if we can run these tests on reference tables using custom "through"
+table' is not supported by SingleStore":
             {
                 "schema.tests.SchemaTests.test_m2m",
                 "schema.tests.SchemaTests.test_m2m_create",
@@ -612,7 +619,8 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
                 "schema.tests.SchemaTests.test_remove_unique_together_does_not_remove_meta_constraints",
                 "migrations.test_operations.OperationTests.test_repoint_field_m2m",
                 "migrations.test_operations.OperationTests.test_rename_model_with_self_referential_m2m",
-                "migrations.test_operations.OperationTests.test_rename_model_with_m2m_models_in_different_apps_with_same_name",
+                "migrations.test_operations.OperationTests." + \
+                "test_rename_model_with_m2m_models_in_different_apps_with_same_name",
                 "migrations.test_operations.OperationTests.test_rename_model_with_m2m",
                 "migrations.test_operations.OperationTests.test_rename_model_with_db_table_rename_m2m",
                 "migrations.test_operations.OperationTests.test_rename_m2m_target_model",
@@ -675,7 +683,7 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
                 "serializers.test_json.JsonSerializerTestCase.test_deterministic_mapping_ordering",
                 "serializers.test_jsonl.JsonlSerializerTestCase.test_deterministic_mapping_ordering",
                 "serializers.test_xml.XmlSerializerTestCase.test_deterministic_mapping_ordering",
-                "serializers.test_yaml.YamlSerializerTestCase.test_deterministic_mapping_ordering",             
+                "serializers.test_yaml.YamlSerializerTestCase.test_deterministic_mapping_ordering",
                 "serializers.test_json.JsonSerializerTestCase.test_serialize_no_only_pk_with_natural_keys",
                 "serializers.test_jsonl.JsonlSerializerTestCase.test_serialize_no_only_pk_with_natural_keys",
                 "serializers.test_xml.XmlSerializerTestCase.test_serialize_no_only_pk_with_natural_keys",
@@ -694,25 +702,31 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
                 "serializers.test_natural.NaturalKeySerializerTests.test_xml_forward_references_m2ms",
                 "serializers.test_natural.NaturalKeySerializerTests.test_yaml_forward_references_m2ms",
             },
-            "The primary key defined explicitly in model causing the error of missing id field":{
+            "The primary key defined explicitly in model causing the error of missing id field":
+            {
                 "get_or_create.tests.GetOrCreateTransactionTests.test_get_or_create_integrityerror",
                 "get_or_create.tests.GetOrCreateThroughManyToMany.test_get_get_or_create",
                 "get_or_create.tests.GetOrCreateThroughManyToMany.test_create_get_or_create",
             },
-            "Feature 'ALTER TABLE...AUTO_INCREMENT=X for sharded tables' is not supported by SingleStore Distributed.":{
+            "Feature 'ALTER TABLE...AUTO_INCREMENT=X for sharded tables' is not supported by SingleStore Distributed.":
+            {
                 "test_runner.tests.AutoIncrementResetTest.test_autoincrement_reset1",
                 "test_runner.tests.AutoIncrementResetTest.test_autoincrement_reset2",
             },
             "SingleStore does not support datetime with timezones":
             {
                 "admin_views.tests.AdminViewBasicTest.test_date_hierarchy_local_date_differ_from_utc",
-                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_timezone_applied_before_truncation",
+                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests." + \
+                    "test_trunc_timezone_applied_before_truncation",  # noqa: E131
                 "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_func_with_timezone",
-                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_ambiguous_and_invalid_times",
+                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests." + \
+                    "test_trunc_ambiguous_and_invalid_times",  # noqa: E131
                 "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_none",
-                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_iso_year_func_boundaries",
+                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests." + \
+                    "test_extract_iso_year_func_boundaries",  # noqa: E131
                 "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_iso_year_func_boundaries",
-                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_extract_func_with_timezone",
+                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests." + \
+                    "test_extract_func_with_timezone",   # noqa: E131
             },
             "SingleStore doest not support the SHA224 hashing algorithm":
             {
@@ -741,7 +755,7 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "SingleStore does not support altering a Table comments":
             {
                 "migrations.test_operations.OperationTests.test_remove_constraint",
-            }
+            },
         }
         return skips
 
@@ -752,7 +766,7 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "lookup.tests.LookupTests.test_regex_backreferencing",
             # AssertionError: 3 != 1 : 3 queries executed, 1 expected
             # Captured queries were: 1. BEGIN  2. Actual query  3. COMMIT
-            # Instead of 1 and 3 we can have 5 and 7 or other numbers which differ by 2 
+            # Instead of 1 and 3 we can have 5 and 7 or other numbers which differ by 2
             # Doesn't look like something is not working, maybe check later
             "order_with_respect_to.tests.OrderWithRespectToBaseTests.test_database_routing",
             "queries.test_bulk_update.BulkUpdateTests.test_database_routing",
@@ -774,7 +788,8 @@ table' is not supported by SingleStore":  # TODO: check if we can run these test
             "bulk_create.tests.BulkCreateTests.test_explicit_batch_size_efficiency",
             "admin_views.tests.UserAdminTest.test_user_permission_performance",
             "admin_views.tests.GroupAdminTest.test_group_permission_performance",
-            "auth_tests.test_management.CreatePermissionsMultipleDatabasesTests.test_set_permissions_fk_to_using_parameter",
+            "auth_tests.test_management.CreatePermissionsMultipleDatabasesTests." + \
+            "test_set_permissions_fk_to_using_parameter",
             "many_to_one_null.tests.ManyToOneNullTests.test_set_clear_non_bulk",
             "delete.tests.DeletionTests.test_cannot_defer_constraint_checks",
             "delete.tests.DeletionTests.test_large_delete",

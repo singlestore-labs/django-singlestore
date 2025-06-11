@@ -1,16 +1,24 @@
-import json
-
-from django.db.models import Lookup
-from django.db.models.fields import TextField
-from django.db.models.fields.json import HasKeyLookup, KeyTransform, JSONExact, JSONField, \
-    JSONIContains, KeyTextTransform
-
-from django.db.models.functions.text import SHA384, SHA256, SHA512, Length, Chr, ConcatPair
-from django.db.models.functions.datetime import Now
-
-from django.db.models.functions import Random, Cast, JSONObject, Repeat, RPad, Length
-from django.db.models.lookups import Transform
 from django.db.models.expressions import Func
+from django.db.models.fields import TextField
+from django.db.models.fields.json import HasKeyLookup
+from django.db.models.fields.json import JSONExact
+from django.db.models.fields.json import JSONField
+from django.db.models.fields.json import JSONIContains
+from django.db.models.fields.json import KeyTextTransform
+from django.db.models.fields.json import KeyTransform
+from django.db.models.functions import Cast
+from django.db.models.functions import JSONObject
+from django.db.models.functions import Random
+from django.db.models.functions import Repeat
+from django.db.models.functions import RPad
+from django.db.models.functions.datetime import Now
+from django.db.models.functions.text import Chr
+from django.db.models.functions.text import ConcatPair
+from django.db.models.functions.text import Length
+from django.db.models.functions.text import SHA256
+from django.db.models.functions.text import SHA384
+from django.db.models.functions.text import SHA512
+from django.db.models.lookups import Transform
 
 
 def random(self, compiler, connection, **extra_context):
@@ -39,7 +47,7 @@ def json_object(self, compiler, connection, **extra_context):
         [
             Cast(expression, TextField()) if index % 2 == 0 else expression
             for index, expression in enumerate(copy.get_source_expressions())
-        ]
+        ],
     )
     return super(JSONObject, copy).as_sql(
         compiler,
@@ -70,7 +78,7 @@ def json_key_lookup(self, compiler, connection, template=None):
     lhs_key_params = []
     if isinstance(self.lhs, KeyTransform):
         lhs, lhs_params, lhs_key_transforms = self.lhs.preprocess_lhs(
-            compiler, connection
+            compiler, connection,
         )
         for key in lhs_key_transforms:
             lhs_key_params.append(key)
@@ -89,7 +97,7 @@ def json_key_lookup(self, compiler, connection, template=None):
             rhs_key_transforms = [key]
         for k in rhs_key_transforms:
             rhs_key_params.append(k)
-            
+
     if not self.logical_operator:
         sql = f"JSON_MATCH_ANY_EXISTS({lhs}, {','.join(['%s'] * (len(lhs_key_params) + len(rhs_key_params)))})"
         return sql, list(lhs_params) + list(lhs_key_params) + list(rhs_key_params)
@@ -106,7 +114,7 @@ def json_key_lookup(self, compiler, connection, template=None):
 class JSONExactSingleStore(JSONExact):
     def process_rhs(self, compiler, connection):
         rhs, rhs_params = super().process_rhs(compiler, connection)
-    
+
         return f"({rhs}) :> JSON", rhs_params
 
     def as_singlestore(self, compiler, connection, **extra_context):
@@ -158,19 +166,19 @@ class SHASingleStore(Transform):
             template="SHA2(%%(expressions)s, %s)" % self.function[3:],
             **extra_context,
         )
-    
+
 
 class LengthSingleStore(Transform):
     def as_singlestore(self, compiler, connection, **extra_context):
         return Transform.as_sql(
-            self, compiler, connection, function="CHARACTER_LENGTH", **extra_context
+            self, compiler, connection, function="CHARACTER_LENGTH", **extra_context,
         )
 
 
 class NowSingleStore(Now):
     def as_singlestore(self, compiler, connection, **extra_context):
         return self.as_sql(
-            compiler, connection, template="CURRENT_TIMESTAMP(6)", **extra_context
+            compiler, connection, template="CURRENT_TIMESTAMP(6)", **extra_context,
         )
 
 
@@ -190,7 +198,7 @@ class ConcatPairSingleStore(Func):
             template="%(function)s('', %(expressions)s)",
             **extra_context,
         )
-    
+
 
 def register_functions():
     Random.as_singlestore = random

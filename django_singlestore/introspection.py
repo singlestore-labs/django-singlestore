@@ -1,23 +1,20 @@
 from collections import namedtuple
 
 import sqlparse
-from singlestoredb.mysql.constants import FIELD_TYPE
-
 from django.db.backends.base.introspection import BaseDatabaseIntrospection
 from django.db.backends.base.introspection import FieldInfo as BaseFieldInfo
 from django.db.backends.base.introspection import TableInfo as BaseTableInfo
 from django.db.models import Index
 from django.utils.datastructures import OrderedSet
+from singlestoredb.mysql.constants import FIELD_TYPE
 
-FieldInfo = namedtuple(
-    "FieldInfo", BaseFieldInfo._fields + ("extra", "is_unsigned", "comment")
-)
+FieldInfo = namedtuple("FieldInfo", BaseFieldInfo._fields + ("extra", "is_unsigned", "comment"))  # type: ignore
 InfoLine = namedtuple(
     "InfoLine",
     "col_name data_type max_len num_prec num_scale extra column_default "
     "collation is_unsigned comment",
 )
-TableInfo = namedtuple("TableInfo", BaseTableInfo._fields + ("comment",))
+TableInfo = namedtuple("TableInfo", BaseTableInfo._fields + ("comment",))   # type: ignore
 
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
@@ -73,7 +70,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 table_comment
             FROM information_schema.tables
             WHERE table_schema = DATABASE()
-            """
+            """,
         )
         return [
             TableInfo(row[0], {"BASE TABLE": "t", "VIEW": "v"}.get(row[1]), row[2])
@@ -109,7 +106,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         field_info = {line[0]: InfoLine(*line) for line in cursor.fetchall()}
 
         cursor.execute(
-            "SELECT * FROM %s LIMIT 1" % self.connection.ops.quote_name(table_name)
+            "SELECT * FROM %s LIMIT 1" % self.connection.ops.quote_name(table_name),
         )
 
         def to_int(i):
@@ -131,7 +128,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                     info.extra,
                     info.is_unsigned,
                     info.comment,
-                )
+                ),
             )
         return fields
 
@@ -209,7 +206,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 constraints[constraint] = {
                     "columns": OrderedSet(),
                     "primary_key": column_key == "PRI" or kind == "PRIMARY",
-                    "unique": column_key in {"PRI", "UNI"} or kind in {"PRIMARY", "UNIQUE"}, 
+                    "unique": column_key in {"PRI", "UNI"} or kind in {"PRIMARY", "UNIQUE"},
                     "index": False,
                     "check": False,
                     "foreign_key": (ref_table, ref_column) if ref_column else None,
@@ -238,7 +235,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
             cursor.execute(type_query, [table_name])
             for constraint, check_clause in cursor.fetchall():
                 constraint_columns = self._parse_constraint_columns(
-                    check_clause, columns
+                    check_clause, columns,
                 )
                 # Ensure uniqueness of unnamed constraints. Unnamed unique
                 # and check columns constraints have the same name as
@@ -256,7 +253,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 }
         # Now add in the indexes
         cursor.execute(
-            "SHOW INDEX FROM %s" % self.connection.ops.quote_name(table_name)
+            "SHOW INDEX FROM %s" % self.connection.ops.quote_name(table_name),
         )
         for table, non_unique, index, colseq, column, order, type_ in [
             x[:6] + (x[10],) for x in cursor.fetchall()
