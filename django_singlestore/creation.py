@@ -48,9 +48,9 @@ class DatabaseCreation(BaseDatabaseCreation):
                             "Destroying old test database for alias %s..."
                             % (
                                 self._get_database_display_str(
-                                    verbosity, target_database_name
+                                    verbosity, target_database_name,
                                 ),
-                            )
+                            ),
                         )
                     cursor.execute("DROP DATABASE %(dbname)s" % test_db_params)
                     self._execute_create_test_db(cursor, test_db_params, keepdb)
@@ -61,7 +61,7 @@ class DatabaseCreation(BaseDatabaseCreation):
 
     def _clone_db(self, source_database_name, target_database_name):
         cmd_args, cmd_env = DatabaseClient.settings_to_cmd_args_env(
-            self.connection.settings_dict, []
+            self.connection.settings_dict, [],
         )
         dump_cmd = [
             "mysqldump",
@@ -75,7 +75,7 @@ class DatabaseCreation(BaseDatabaseCreation):
         load_cmd[-1] = target_database_name
 
         with subprocess.Popen(
-            dump_cmd, stdout=subprocess.PIPE, env=dump_env
+            dump_cmd, stdout=subprocess.PIPE, env=dump_env,
         ) as dump_proc:
             with subprocess.Popen(
                 load_cmd,

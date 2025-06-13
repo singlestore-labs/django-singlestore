@@ -1,7 +1,8 @@
 import os
 
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
-from django.db.models import NOT_PROVIDED, Manager
+from django.db.models import Manager
+from django.db.models import NOT_PROVIDED
 
 
 class ModelStorageManager(Manager):
@@ -41,10 +42,10 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     sql_create_index = "CREATE INDEX %(name)s ON %(table)s (%(columns)s)%(extra)s"
 
     sql_rename_column = "ALTER TABLE %(table)s CHANGE %(old_column)s %(new_column)s"
-    
+
     # sql_alter_table_comment doesn't work yet TODO
     sql_alter_table_comment = "ALTER TABLE %(table)s COMMENT = %(comment)s"
-    
+
     sql_alter_column_comment = "ALTER TABLE %(table)s MODIFY COLUMN %(column)s %(type)s %(comment)s"
 
     @property
@@ -57,7 +58,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         #     value = value.replace("%", "%%")
         # MySQLdb escapes to string, PyMySQL to bytes.
         quoted = self.connection.connection.escape(
-            value, self.connection.connection.encoders
+            value, self.connection.connection.encoders,
         )
         if isinstance(value, str) and isinstance(quoted, bytes):
             quoted = quoted.decode()
@@ -104,11 +105,14 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             result_sql_parts.append("NULL")
         if field.primary_key:
             result_sql_parts.append("PRIMARY KEY")
-        # if DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_<APP_ANME> env variable is set, we don't enforce unique constraints
-        # on tables created for this app.
+        # if DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_<APP_ANME> env variable is set, we don't enforce unique
+        # constraints on tables created for this app.
         # This is needed to create test tables that must have more than one unique field which
         # is not allowed in SingleStore distributed tables.
-        elif field.unique and os.getenv("DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_" + model._meta.app_label.upper()) is None:
+        elif field.unique and os.getenv(
+            "DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_" +
+            model._meta.app_label.upper(),
+        ) is None:
             result_sql_parts.append("UNIQUE")
 
         return " ".join(result_sql_parts), []
@@ -144,7 +148,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             if field.remote_field and field.db_constraint:
                 to_table = field.remote_field.model._meta.db_table
                 to_column = field.remote_field.model._meta.get_field(
-                    field.remote_field.field_name
+                    field.remote_field.field_name,
                 ).column
                 if self.sql_create_inline_fk:
                     definition += " " + self.sql_create_inline_fk % {
@@ -154,8 +158,8 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 elif self.connection.features.supports_foreign_keys:
                     self.deferred_sql.append(
                         self._create_fk_sql(
-                            model, field, "_fk_%(to_table)s_%(to_column)s"
-                        )
+                            model, field, "_fk_%(to_table)s_%(to_column)s",
+                        ),
                     )
             # Add the SQL to our big list.
             column_sqls.append(
@@ -163,7 +167,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 % (
                     self.quote_name(field.column),
                     definition,
-                )
+                ),
             )
             # Autoincrement SQL (for backends with post table definition
             # variant).
@@ -173,7 +177,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                 "SmallAutoField",
             ):
                 autoinc_sql = self.connection.ops.autoinc_sql(
-                    model._meta.db_table, field.column
+                    model._meta.db_table, field.column,
                 )
                 if autoinc_sql:
                     self.deferred_sql.extend(autoinc_sql)
@@ -182,7 +186,10 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
                     # we must have the unique field as the shard key. Each django model has a field
                     # designated as a primary key, so it must be the shard key as well
                     additional_keys.append(f"SHARD KEY ({self.quote_name(field.column)})")
-                elif field.unique and os.getenv("DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_" + model._meta.app_label.upper()) is not None:
+                elif field.unique and os.getenv(
+                    "DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_" +
+                    model._meta.app_label.upper(),
+                ) is not None:
                     additional_keys.append(f"UNIQUE KEY({self.quote_name(field.column)}) UNENFORCED RELY")
         for field_names in model._meta.unique_together:
             fields = [model._meta.get_field(field) for field in field_names]
@@ -204,7 +211,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         }
         if model._meta.db_tablespace:
             tablespace_sql = self.connection.ops.tablespace_sql(
-                model._meta.db_tablespace
+                model._meta.db_tablespace,
             )
             if tablespace_sql:
                 sql += " " + tablespace_sql
@@ -258,9 +265,9 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         )
 
     def _alter_column_type_sql(
-        self, model, old_field, new_field, new_type, old_collation, new_collation
+        self, model, old_field, new_field, new_type, old_collation, new_collation,
     ):
         new_type = self._set_field_new_type_null_status(old_field, new_type)
         return super()._alter_column_type_sql(
-            model, old_field, new_field, new_type, old_collation, new_collation
+            model, old_field, new_field, new_type, old_collation, new_collation,
         )

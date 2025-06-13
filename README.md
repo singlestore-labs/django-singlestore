@@ -45,7 +45,7 @@ SingleStore has several notable to differences compared to databases like Postre
 #### Lack of Foreign Keys
 SingleStore does not enforce FOREIGN KEY constraints. The application must ensure referential integrity itself.
 
-#### Unique Keys constraints 
+#### Unique Keys constraints
 SingleStore does not support UNIQUE constraints on non-shard key columns in distributed tables. In particular, this means many-to-many intermediate tables (unless REFERENCE) in SingleStore must be built without id column, as they must have a unique constraint on `(column_from, column_to)`.
 
 To overcome the limitation on UNIQUE constraint, `django-singlestore` provides the following mechanisms.
@@ -114,7 +114,7 @@ export DJANGO_SINGLESTORE_SKIP_AUTOCOMMIT=1
 
 
 #### Notes
-- In a model, `OneToOneField` must have `primary_key=True`, otherwise the model must be materialized to a reference table. 
+- In a model, `OneToOneField` must have `primary_key=True`, otherwise the model must be materialized to a reference table.
 - If one modifies the definition of an m2m field to include a `through` model, the result of `serialize` for this model will change: it won't include the related field values, because of how python Serializer is implemented:
 ```
 def handle_m2m_field(self, obj, field):
