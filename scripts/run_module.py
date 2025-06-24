@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-
 import os
-import sys
 import subprocess
+import sys
 
 def run_sql_setup(module_name):
     sql_path = f"scripts/sql_setup/{module_name}.sql"
@@ -13,7 +12,7 @@ def run_sql_setup(module_name):
                 f"mysql -h 127.0.0.1 -P 3307 -u root --password=root < {sql_path}",
                 shell=True,
                 check=True,
-                executable='/bin/bash'
+                executable='/bin/bash',
             )
         except subprocess.CalledProcessError as e:
             print(f"SQL setup failed for '{module_name}': {e}")
@@ -31,7 +30,7 @@ def run_test_module(module_name):
     cmd = [
         "python", "tests/runtests.py",
         "--settings", settings,
-        "--noinput", "-v", "3", module_name
+        "--noinput", "-v", "3", module_name,
     ]
 
     result = subprocess.run(cmd)

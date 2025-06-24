@@ -23,7 +23,7 @@ export DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_FOREIGN_OBJECT="ROWSTORE REFERENCE"
 # lot of unique keys
 export DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_AUTH_TESTS="ROWSTORE REFERENCE"
 
-# abstract models - specifying through is tricky 
+# abstract models - specifying through is tricky
 export DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_MANY_TO_MANY="ROWSTORE REFERENCE"
 
 # a number of models with unique keys, 13 many-to-many fields
