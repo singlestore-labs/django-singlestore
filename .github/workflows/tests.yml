@@ -29,11 +29,12 @@ jobs:
           echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
 
   run-tests:
-    name: Run tests (${{ matrix.module }})
+    name: Run tests (Group ${{ matrix.group }})
     needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+      matrix:
+        group: [0, 1, 2, 3, 4]
     services:
       singlestore:
         image: ghcr.io/singlestore-labs/singlestoredb-dev:latest
@@ -42,7 +43,7 @@ jobs:
         env:
           SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
           ROOT_PASSWORD: root
-        options: --health-cmd="mysqladmin ping -h 127.0.0.1 -u root --password=root" --health-interval=10s --health-timeout=5s --health-retries=5
+        # options: --health-cmd="mysqladmin ping -h 127.0.0.1 -u root --password=root" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: Checkout django-singlestore repo
@@ -61,22 +62,22 @@ jobs:
           python-version: "3.10"
           cache: pip
 
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          # pip install -r testrepo/test-requirements.txt
-          # pip install -r testrepo/requirements.txt
-          # pip install .
-
       - name: Export env vars from local_test.sh
         run: |
           set -a
           source testrepo/tests/_utils/local_test.sh
           set +a
 
-      - name: Run test module
+      - name: Run setup script
         run: |
-          echo "Running ${{ matrix.module }}"
-          python scripts/run_module.py ${{ matrix.module }}
+          echo "Running setup script for group ${{ matrix.group }}"
+          python scripts/setup_group.py ${{ matrix.group }}
+        env:
+          SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
+
+      - name: Run test modules for group
+        run: |
+          echo "Running test modules for group ${{ matrix.group }}"
+          python scripts/run_group.py ${{ matrix.group }}
         env:
           SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}

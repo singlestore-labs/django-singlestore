@@ -23,6 +23,12 @@ def get_test_modules(tests_root):
 
     return test_modules
 
+def split_into_groups(modules, num_groups):
+    groups = [[] for _ in range(num_groups)]
+    for i, module in enumerate(modules):
+        groups[i % num_groups].append(module)
+    return groups
+
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         tests_dir = sys.argv[1]
@@ -34,5 +40,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     modules = get_test_modules(tests_dir)
-    matrix = {"include": [{"module": m} for m in modules]}
+    num_groups = 5
+    groups = split_into_groups(modules, num_groups)
+    matrix = {"include": [{"group": i, "modules": groups[i]} for i in range(num_groups)]}
     print(json.dumps(matrix))
