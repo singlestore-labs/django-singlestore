@@ -3,7 +3,7 @@ import subprocess
 
 def setup_group(group_id):
     print(f"Setting up for group {group_id}")
-    sql_file = "testrepo/tests/_utils/setup.sql"
+    sql_file = "scripts/setup.sql"
     mysql_cmd = [
         "mysql",
         "-h", "127.0.0.1",
