@@ -65,7 +65,7 @@ jobs:
       - name: Export env vars from local_test.sh
         run: |
           set -a
-          source testrepo/tests/_utils/local_test.sh
+          source scripts/local_test.sh
           set +a
 
       - name: Run setup script
