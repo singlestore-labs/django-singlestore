@@ -1,19 +1,29 @@
 import json
 import sys
+import subprocess
 
-def run_group(group_id, modules):
-    print(f"Running group {group_id} with modules: {modules}")
+def run_group(modules):
+    print(f"Running modules: {modules}")
     for module in modules:
         print(f"Running module: {module}")
-        # Add logic to run the module here
+        cmd = [
+            "./testrepo/tests/runtests.py",
+            "--settings=singlestore_settings",
+            "--noinput",
+            "-v", "3",
+            module,
+            "--keepdb"
+        ]
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Module {module} failed with error: {e}")
+            sys.exit(1)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python run_group.py <group_id>")
+        print("Usage: python run_group.py <modules_json>")
         sys.exit(1)
 
-    group_id = int(sys.argv[1])
-    with open("matrix.json") as f:
-        matrix = json.load(f)
-        modules = next(group["modules"] for group in matrix["include"] if group["group"] == group_id)
-    run_group(group_id, modules)
+    modules = json.loads(sys.argv[1])
+    run_group(modules)
