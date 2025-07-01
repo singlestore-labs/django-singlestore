@@ -38,12 +38,13 @@ jobs:
       singlestore:
         image: ghcr.io/singlestore-labs/singlestoredb-dev:latest
         ports:
-          - 3307:3306
+          - 3306:3306
+          - 8080:8080
+          - 9000:9000
         env:
           SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
-          ROOT_PASSWORD: root
-        # options: --health-cmd="mysqladmin ping -h 127.0.0.1 -u root --password=root" --health-interval=10s --health-timeout=5s --health-retries=5
-
+          ROOT_PASSWORD: "p"
+      
     steps:
       - name: Checkout django-singlestore repo
         uses: actions/checkout@v4
@@ -61,22 +62,18 @@ jobs:
           python-version: "3.10"
           cache: pip
 
-      - name: Export env vars from local_test.sh
+      - name: Install dependencies
         run: |
-          set -a
-          source scripts/local_test.sh
-          set +a
+          pip install ./testrepo
+          pip install .
 
       - name: Run setup script
         run: |
           echo "Running setup script for group ${{ matrix.group }}"
           python scripts/setup_group.py ${{ matrix.group }}
-        env:
-          SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
 
       - name: Run test modules for group
         run: |
           echo "Running test modules for group ${{ matrix.group }}"
           python scripts/run_group.py '${{ toJson(matrix.modules) }}'
-        env:
-          SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
+

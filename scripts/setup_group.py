@@ -1,5 +1,6 @@
-import sys
 import subprocess
+import sys
+
 
 def setup_group(group_id):
     print(f"Setting up for group {group_id}")
@@ -7,10 +8,10 @@ def setup_group(group_id):
     mysql_cmd = [
         "mysql",
         "-h", "127.0.0.1",
-        "-P", "3307",
+        "-P", "3306",
         "-u", "root",
-        "-proot",
-        "-e", f"source {sql_file}"
+        "-pp",
+        "-e", f"source {sql_file}",
     ]
     try:
         subprocess.run(mysql_cmd, check=True)
@@ -18,6 +19,7 @@ def setup_group(group_id):
     except subprocess.CalledProcessError as e:
         print(f"Failed to execute SQL setup script: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

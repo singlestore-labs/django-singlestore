@@ -1,4 +1,4 @@
-export DJANGO_HOME=`pwd`
+export DJANGO_HOME="$(pwd)/testrepo"
 
 export PYTHONPATH=$DJANGO_HOME:$DJANGO_HOME/tests:$DJANGO_HOME/tests/singlestore_settings:$PYTHONPATH
 
