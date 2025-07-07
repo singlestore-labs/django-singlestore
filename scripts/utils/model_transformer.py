@@ -41,7 +41,7 @@ def generate_intermediary_code(original_code):
     new_code = re.sub(
         r'(\s*' + field_name + r'\s*=\s*models\.ManyToManyField\([^\)]*\))',
         rf'\n    {field_name} = models.ManyToManyField("{related_model}"{additional_args_str}, {through_str})',
-        original_code
+        original_code,
     ).replace(",,", ",").replace(", ,", ",")  # This will clean up any double commas
 
     intermediary_code = f"""
