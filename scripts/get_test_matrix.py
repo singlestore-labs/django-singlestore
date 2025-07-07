@@ -2,6 +2,8 @@ import json
 import os
 import sys
 
+DEFAULT_NUM_GROUPS_FOR_TESTS = 5
+
 
 def get_test_modules(tests_root):
     subdirs_to_skip = {
@@ -42,7 +44,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     modules = get_test_modules(tests_dir)
-    num_groups = 5
+    num_groups = num_groups = int(os.environ.get("NUM_GROUPS", 5))
     groups = split_into_groups(modules, num_groups)
     matrix = {"include": [{"group": i, "modules": groups[i]} for i in range(num_groups)]}
     print(json.dumps(matrix))

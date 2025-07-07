@@ -27,6 +27,8 @@ jobs:
         run: |
           python scripts/get_test_matrix.py testrepo/tests | tee matrix.json
           echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
+        env:
+          NUM_GROUPS: 5
 
   run-tests:
     name: Run tests (Group ${{ matrix.group }})
@@ -45,7 +47,7 @@ jobs:
         env:
           SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
           ROOT_PASSWORD: "p"
-      
+
     steps:
       - name: Remove unnecessary pre-installed toolchains for free disk space
         run: |
@@ -91,4 +93,3 @@ jobs:
         run: |
           echo "Running test modules for group ${{ matrix.group }}"
           python scripts/run_group.py '${{ toJson(matrix.modules) }}'
-

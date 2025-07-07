@@ -1,7 +1,7 @@
 import json
+import os
 import subprocess
 import sys
-import os
 
 DJANGO_HOME = os.path.join(os.getcwd(), "testrepo")
 os.environ["DJANGO_HOME"] = DJANGO_HOME
