@@ -33,6 +33,7 @@ jobs:
     needs: generate-matrix
     runs-on: ubuntu-latest
     strategy:
+        fail-fast: false
         matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     services:
       singlestore:
@@ -46,6 +47,20 @@ jobs:
           ROOT_PASSWORD: "p"
       
     steps:
+      - name: Remove unnecessary pre-installed toolchains for free disk space
+        run: |
+          echo "=== BEFORE ==="
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/hostedtoolcache
+          docker system prune -af || true
+          sudo apt-get clean
+          echo "=== AFTER ==="
+          df -h
       - name: Checkout django-singlestore repo
         uses: actions/checkout@v4
 
