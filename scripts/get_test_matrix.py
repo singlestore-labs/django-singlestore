@@ -7,7 +7,7 @@ DEFAULT_NUM_GROUPS_FOR_TESTS = 5
 
 def get_test_modules(tests_root):
     subdirs_to_skip = {
-        "": {"import_error_package", "test_runner_apps"},
+        "": {"import_error_package", "test_runner_apps", "__pycache__", "requirements"},
         "gis_tests": {"data"},
     }
 
@@ -15,11 +15,7 @@ def get_test_modules(tests_root):
 
     for item in os.listdir(tests_root):
         full_path = os.path.join(tests_root, item)
-        if not os.path.isdir(full_path):
-            continue
-        if item in subdirs_to_skip.get("", set()):
-            continue
-        if item == "__pycache__" or item == "requirements":
+        if not os.path.isdir(full_path) or item in subdirs_to_skip.get("", set()):
             continue
         test_modules.append(item)
 
@@ -44,7 +40,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     modules = get_test_modules(tests_dir)
-    num_groups = num_groups = int(os.environ.get("NUM_GROUPS", 5))
+    num_groups = num_groups = int(os.environ.get("NUM_GROUPS", DEFAULT_NUM_GROUPS_FOR_TESTS))
     groups = split_into_groups(modules, num_groups)
     matrix = {"include": [{"group": i, "modules": groups[i]} for i in range(num_groups)]}
     print(json.dumps(matrix))

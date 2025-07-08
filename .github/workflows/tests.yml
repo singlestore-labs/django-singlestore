@@ -46,7 +46,7 @@ jobs:
           - 9000:9000
         env:
           SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
-          ROOT_PASSWORD: "p"
+          ROOT_PASSWORD: ${{ secrets.SINGLESTORE_PASSWORD }}
 
     steps:
       - name: Remove unnecessary pre-installed toolchains for free disk space
@@ -79,15 +79,10 @@ jobs:
           python-version: "3.10"
           cache: pip
 
-      - name: Install dependencies
+      - name: Install test suite and package
         run: |
           pip install ./testrepo
           pip install .
-
-      - name: Run setup script
-        run: |
-          echo "Running setup script for group ${{ matrix.group }}"
-          python scripts/setup_group.py ${{ matrix.group }}
 
       - name: Run test modules for group
         run: |
