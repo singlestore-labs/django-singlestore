@@ -49,8 +49,8 @@ os.environ["DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_QUERIES"] = "1"
 
 
 def create_databases():
-    """Creates the required test databases if they don't already exist."""
-    print("--- Creating test databases ---")
+    """Drops and recreates the required test databases to ensure they are empty."""
+    print("--- Resetting test databases ---")
     password = os.environ.get("SINGLESTORE_PASSWORD", "")
     databases_to_create = ["test_django_db", "test_django_db_other"]
 
@@ -60,11 +60,12 @@ def create_databases():
         ) as conn:
             with conn.cursor() as cur:
                 for db_name in databases_to_create:
-                    print(f"Ensuring database '{db_name}' exists.")
-                    cur.execute(f"CREATE DATABASE IF NOT EXISTS `{db_name}`;")
+                    print(f"Dropping and recreating database '{db_name}' to ensure it is empty.")
+                    cur.execute(f"DROP DATABASE IF EXISTS `{db_name}`;")
+                    cur.execute(f"CREATE DATABASE `{db_name}`;")
         print("--- Test databases are ready ---")
     except Exception as e:
-        print(f"FATAL: Failed to create databases: {e}")
+        print(f"FATAL: Failed to reset databases: {e}")
         sys.exit(1)
 
 
@@ -83,11 +84,11 @@ def setup_module(module):
     try:
         with open(sql_file, 'r') as f:
             sql_script = f.read()
-        
+
         sql_statements = [s.strip() for s in sql_script.split(';') if s.strip()]
 
         for db_name in databases:
-            print(f"Execing setup script for module '{module}' in database '{db_name}'")
+            print(f"Executing setup script for module '{module}' in database '{db_name}'")
             with s2.connect(
                 host="127.0.0.1",
                 port=3306,
