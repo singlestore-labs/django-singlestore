@@ -83,6 +83,8 @@ def setup_module(module):
     try:
         with open(sql_file, 'r') as f:
             sql_script = f.read()
+        
+        sql_statements = [s.strip() for s in sql_script.split(';') if s.strip()]
 
         for db_name in databases:
             print(f"Execing setup script for module '{module}' in database '{db_name}'")
@@ -94,8 +96,8 @@ def setup_module(module):
                 database=db_name,
             ) as conn:
                 with conn.cursor() as cur:
-                    for _ in cur.execute(sql_script, multi=True):
-                        pass
+                    for statement in sql_statements:
+                        cur.execute(statement)
             print(f"Successfully executed setup for module '{module}' in '{db_name}'.")
     except Exception as e:
         print(f"Failed to execute setup for module '{module}': {e}")

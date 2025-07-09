@@ -8,7 +8,6 @@ CREATE TABLE `get_or_create_thing_tag` (
   KEY (`tag_id`)
 );
 
-
 CREATE TABLE `get_or_create_book_author` (
   `book_id` BIGINT NOT NULL,
   `author_id` BIGINT NOT NULL,

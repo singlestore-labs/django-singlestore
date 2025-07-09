@@ -87,7 +87,7 @@ jobs:
       - name: Run test modules for group
         run: |
           echo "Running test modules for group ${{ matrix.group }}"
-          python scripts/run_group.py '${{ toJson(matrix.modules) }}'
+          python scripts/run_group.py '${{ toJson(matrix.modules) }}' --keepdb
         env:
           SINGLESTORE_PASSWORD: ${{ secrets.SINGLESTORE_PASSWORD }}
           NUM_GROUPS: 5

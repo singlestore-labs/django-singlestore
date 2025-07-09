@@ -8,7 +8,6 @@ CREATE TABLE `queries_annotation_note` (
   KEY (`note_id`)
 );
 
-
 CREATE TABLE `queries_item_tag` (
   `item_id` BIGINT NOT NULL,
   `tag_id` BIGINT NOT NULL,
