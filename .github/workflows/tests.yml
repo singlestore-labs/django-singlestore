@@ -42,8 +42,6 @@ jobs:
         image: ghcr.io/singlestore-labs/singlestoredb-dev:latest
         ports:
           - 3306:3306
-          - 8080:8080
-          - 9000:9000
         env:
           SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
           ROOT_PASSWORD: ${{ secrets.SINGLESTORE_PASSWORD }}
@@ -63,6 +61,7 @@ jobs:
           sudo apt-get clean
           echo "=== AFTER ==="
           df -h
+
       - name: Checkout django-singlestore repo
         uses: actions/checkout@v4
 
@@ -81,6 +80,7 @@ jobs:
 
       - name: Install test suite and package
         run: |
+          pip install singlestoredb
           pip install ./testrepo
           pip install .
 
@@ -88,3 +88,6 @@ jobs:
         run: |
           echo "Running test modules for group ${{ matrix.group }}"
           python scripts/run_group.py '${{ toJson(matrix.modules) }}'
+        env:
+          SINGLESTORE_PASSWORD: ${{ secrets.SINGLESTORE_PASSWORD }}
+          NUM_GROUPS: 5

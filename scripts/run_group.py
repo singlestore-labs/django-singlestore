@@ -3,10 +3,14 @@ import os
 import subprocess
 import sys
 
+import singlestoredb as s2
+
 DJANGO_HOME = os.path.join(os.getcwd(), "testrepo")
+DJANGO_SINGLESTORE_HOME = os.getcwd()
 os.environ["DJANGO_HOME"] = DJANGO_HOME
+
 os.environ["PYTHONPATH"] = (
-    f"{DJANGO_HOME}:{DJANGO_HOME}/tests:{DJANGO_HOME}/tests/singlestore_settings:"
+    f"{DJANGO_HOME}:{DJANGO_HOME}/tests:{DJANGO_SINGLESTORE_HOME}/scripts:"
     + os.environ.get("PYTHONPATH", "")
 )
 
@@ -44,29 +48,57 @@ os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_DELETE"] = "ROWSTORE REFERENCE
 os.environ["DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_QUERIES"] = "1"
 
 
-def setup_module(module, ):
+def create_databases():
+    """Creates the required test databases if they don't already exist."""
+    print("--- Creating test databases ---")
+    password = os.environ.get("SINGLESTORE_PASSWORD", "")
+    databases_to_create = ["test_django_db", "test_django_db_other"]
+
+    try:
+        with s2.connect(
+            host="127.0.0.1", port=3306, user="root", password=password,
+        ) as conn:
+            with conn.cursor() as cur:
+                for db_name in databases_to_create:
+                    print(f"Ensuring database '{db_name}' exists.")
+                    cur.execute(f"CREATE DATABASE IF NOT EXISTS `{db_name}`;")
+        print("--- Test databases are ready ---")
+    except Exception as e:
+        print(f"FATAL: Failed to create databases: {e}")
+        sys.exit(1)
+
+
+def setup_module(module):
     """Runs a setup SQL script for the given module if it exists."""
-    sql_file = f"scripts/setup_section/{module}.sql"
+    sql_file = f"scripts/setup_sections/{module}_setup.sql"
+    print(f"Checking for setup script: {sql_file}")
     if not os.path.exists(sql_file):
-        # No setup script for this module, which is fine.
+        # No setup script for this module.
         return
 
-    print(f"--- Setting up for module '{module}' ---")
+    print(f"--- Setting up for module '{module}' in both databases ---")
     password = os.environ.get("SINGLESTORE_PASSWORD", "")
-    mysql_cmd = [
-        "mysql",
-        "-h", "127.0.0.1",
-        "-P", "3306",
-        "-u", "root",
-        f"-p{password}",  # Attach password directly to -p
-        "-e", f"source {sql_file}",
-    ]
+    databases = ["test_django_db", "test_django_db_other"]
+
     try:
-        result = subprocess.run(mysql_cmd, check=True, capture_output=True, text=True)
-        print(f"Successfully executed setup for module '{module}'.")
-    except subprocess.CalledProcessError as e:
+        with open(sql_file, 'r') as f:
+            sql_script = f.read()
+
+        for db_name in databases:
+            print(f"Execing setup script for module '{module}' in database '{db_name}'")
+            with s2.connect(
+                host="127.0.0.1",
+                port=3306,
+                user="root",
+                password=password,
+                database=db_name,
+            ) as conn:
+                with conn.cursor() as cur:
+                    for _ in cur.execute(sql_script, multi=True):
+                        pass
+            print(f"Successfully executed setup for module '{module}' in '{db_name}'.")
+    except Exception as e:
         print(f"Failed to execute setup for module '{module}': {e}")
-        print(f"Stderr from failed setup: {e.stderr}")
         sys.exit(1)
 
 
@@ -74,7 +106,7 @@ def run_group(modules, need_keep_db):
     print(f"Running modules: {modules}")
     failed = []
     for module in modules:
-        # Run setup for the specific module before running its tests.
+        create_databases()
         setup_module(module)
 
         print(f"--- Running tests for module: {module} ---")
