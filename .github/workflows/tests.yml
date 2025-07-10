@@ -1,0 +1,93 @@
+name: Django backend tests
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  generate-matrix:
+    name: Generate test matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone test suite
+        uses: actions/checkout@v4
+        with:
+          repository: singlestore-labs/django
+          ref: singlestore-test-4.2.x
+          path: testrepo
+
+      - name: Generate matrix JSON
+        id: set-matrix
+        run: |
+          python scripts/get_test_matrix.py testrepo/tests | tee matrix.json
+          echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
+        env:
+          NUM_GROUPS: 5
+
+  run-tests:
+    name: Run tests (Group ${{ matrix.group }})
+    needs: generate-matrix
+    runs-on: ubuntu-latest
+    strategy:
+        fail-fast: false
+        matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    services:
+      singlestore:
+        image: ghcr.io/singlestore-labs/singlestoredb-dev:latest
+        ports:
+          - 3306:3306
+        env:
+          SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
+          ROOT_PASSWORD: ${{ secrets.SINGLESTORE_PASSWORD }}
+
+    steps:
+      - name: Remove unnecessary pre-installed toolchains for free disk space
+        run: |
+          echo "=== BEFORE ==="
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/hostedtoolcache
+          docker system prune -af || true
+          sudo apt-get clean
+          echo "=== AFTER ==="
+          df -h
+
+      - name: Checkout django-singlestore repo
+        uses: actions/checkout@v4
+
+      - name: Checkout test repo
+        uses: actions/checkout@v4
+        with:
+          repository: singlestore-labs/django
+          ref: singlestore-test-4.2.x
+          path: testrepo
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install test suite and package
+        run: |
+          pip install singlestoredb
+          pip install ./testrepo
+          pip install .
+
+      - name: Run test modules for group
+        run: |
+          echo "Running test modules for group ${{ matrix.group }}"
+          python scripts/run_group.py '${{ toJson(matrix.modules) }}' --keepdb
+        env:
+          SINGLESTORE_PASSWORD: ${{ secrets.SINGLESTORE_PASSWORD }}
+          NUM_GROUPS: 5
