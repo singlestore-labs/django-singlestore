@@ -5,7 +5,7 @@ import sys
 
 import singlestoredb as s2
 
-DJANGO_HOME = os.path.join(os.getcwd(), "testrepo")
+DJANGO_HOME = os.environ.get("DJANGO_HOME", os.path.join(os.getcwd(), "testrepo"))
 DJANGO_SINGLESTORE_HOME = os.getcwd()
 os.environ["DJANGO_HOME"] = DJANGO_HOME
 
@@ -107,6 +107,13 @@ def setup_module(module):
 
 def run_group(modules, need_keep_db):
     print(f"Running modules: {modules}")
+
+    runtests_script = os.path.join(DJANGO_HOME, "tests", "runtests.py")
+    if not os.path.exists(runtests_script):
+        print(f"FATAL: runtests.py not found at: {runtests_script}")
+        sys.exit(1) 
+    
+    env = os.environ.copy()
     failed = []
     for module in modules:
         create_databases()
@@ -114,7 +121,8 @@ def run_group(modules, need_keep_db):
 
         print(f"--- Running tests for module: {module} ---")
         cmd = [
-            "./testrepo/tests/runtests.py",
+            sys.executable,
+            runtests_script,
             "--settings=singlestore_settings",
             "--noinput",
             "-v", "3",
