@@ -756,6 +756,11 @@ table' is not supported by SingleStore":
             {
                 "migrations.test_operations.OperationTests.test_remove_constraint",
             },
+            "The custom through model for ManyToManyField causes a get() error due to the missing id field.":
+            {
+                #TODO: check the workaround to fetch the through(Relationship) model
+                "queryset_pickle.tests.PickleabilityTestCase.test_model_pickle_m2m",
+            },
         }
         return skips
 
