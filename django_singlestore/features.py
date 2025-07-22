@@ -411,7 +411,8 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "get_or_create.tests.UpdateOrCreateTests.test_update_with_many",
                 "get_or_create.tests.UpdateOrCreateTests.test_mti_update_non_local_concrete_fields",
                 "get_or_create.tests.UpdateOrCreateTests.test_manual_primary_key_test",
-                "m2m_through.tests.M2mThroughTests.test_update_or_create_on_m2m_with_intermediate_model_value_required_fails",
+                "m2m_through.tests.M2mThroughTests.\
+test_update_or_create_on_m2m_with_intermediate_model_value_required_fails",
                 "m2m_through.tests.M2mThroughTests.test_update_or_create_on_m2m_with_intermediate_model_value_required",
             },
             "update_or_create uses two nested atomic blocks, and rollback is not done properly without savepoint":
@@ -760,7 +761,7 @@ table' is not supported by SingleStore":
             },
             "The custom through model for ManyToManyField causes a get() error due to the missing id field.":
             {
-                #TODO: check the workaround to fetch the through(Relationship) model
+                # TODO: check the workaround to fetch the through(Relationship) model
                 "queryset_pickle.tests.PickleabilityTestCase.test_model_pickle_m2m",
             },
         }
