@@ -364,22 +364,21 @@ class DatabaseOperations(BaseDatabaseOperations):
             ) * 2
         params = (*rhs_params, *lhs_params)
         return "TIMESTAMPDIFF(MICROSECOND, %s, %s)" % (rhs_sql, lhs_sql), params
-
+        
     def explain_query_prefix(self, format=None, **options):
-        # Alias MySQL's TRADITIONAL to TEXT for consistency with other backends.
-        if format and format.upper() == "TEXT":
-            format = "TRADITIONAL"
-        elif (
-            not format and "TREE" in self.connection.features.supported_explain_formats
-        ):
-            # Use TREE by default (if supported) as it's more informative.
-            format = "TREE"
+        prefix = self.explain_prefix
         analyze = options.pop("analyze", False)
-        prefix = super().explain_query_prefix(format, **options)
+
         if analyze and self.connection.features.supports_explain_analyze:
             prefix += " ANALYZE"
-        if format and not analyze:
-            prefix += " FORMAT=%s" % format
+
+        if format:
+            # SingleStore uses 'EXPLAIN JSON ...', not 'EXPLAIN FORMAT=JSON ...'.
+            # The default output is already text, so 'TEXT' format is a no-op.
+            supported_formats = self.connection.features.supported_explain_formats
+            if format.upper() in supported_formats and format.upper() != "TEXT":
+                prefix += f" {format.upper()}"
+
         return prefix
 
     def regex_lookup(self, lookup_type):

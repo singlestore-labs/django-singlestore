@@ -414,6 +414,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "m2m_through.tests.M2mThroughTests.\
 test_update_or_create_on_m2m_with_intermediate_model_value_required_fails",
                 "m2m_through.tests.M2mThroughTests.test_update_or_create_on_m2m_with_intermediate_model_value_required",
+                "async.test_async_related_managers.AsyncRelatedManagersOperationTest.test_aupdate_or_create",
             },
             "update_or_create uses two nested atomic blocks, and rollback is not done properly without savepoint":
             {
