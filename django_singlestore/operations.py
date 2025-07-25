@@ -364,7 +364,7 @@ class DatabaseOperations(BaseDatabaseOperations):
             ) * 2
         params = (*rhs_params, *lhs_params)
         return "TIMESTAMPDIFF(MICROSECOND, %s, %s)" % (rhs_sql, lhs_sql), params
-        
+
     def explain_query_prefix(self, format=None, **options):
         prefix = self.explain_prefix
         analyze = options.pop("analyze", False)
