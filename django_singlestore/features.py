@@ -727,6 +727,8 @@ table' is not supported by SingleStore":
                 "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_iso_year_func_boundaries",
                 "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests." + \
                     "test_extract_func_with_timezone",   # noqa: E131
+                "datetimes.tests.DateTimesTests.test_datetimes_ambiguous_and_invalid_times",
+                "datetimes.tests.DateTimesTests.test_21432",
             },
             "SingleStore doest not support the SHA224 hashing algorithm":
             {
