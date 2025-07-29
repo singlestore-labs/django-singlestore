@@ -411,6 +411,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "get_or_create.tests.UpdateOrCreateTests.test_update_with_many",
                 "get_or_create.tests.UpdateOrCreateTests.test_mti_update_non_local_concrete_fields",
                 "get_or_create.tests.UpdateOrCreateTests.test_manual_primary_key_test",
+                "filtered_relation.tests.FilteredRelationTests.test_select_for_update",
             },
             "update_or_create uses two nested atomic blocks, and rollback is not done properly without savepoint":
             {
