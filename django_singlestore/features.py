@@ -760,6 +760,7 @@ table' is not supported by SingleStore":
             "SingleStore does not support altering a Table comments":
             {
                 "migrations.test_operations.OperationTests.test_remove_constraint",
+                "migrations.test_operations.OperationTests.test_alter_model_table_comment",
             },
         }
         return skips
