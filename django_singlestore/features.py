@@ -517,6 +517,9 @@ but certain django functionality requires id column to be present":
                 "backends.base.test_creation.TestDeserializeDbFromString.test_circular_reference_with_natural_key",
                 "backends.base.test_creation.TestDeserializeDbFromString.test_self_reference",
                 "backends.base.test_creation.TestDeserializeDbFromString.test_serialize_db_to_string_base_manager",
+                "signals.tests.SignalTests.test_delete_signals_origin_model",
+                "signals.tests.SignalTests.test_delete_signals_origin_queryset",
+                "signals.tests.SignalTests.test_save_and_delete_signals_with_m2m",
             },
             "LIMIT with UNION affects only the second part of the union":
             {
@@ -713,6 +716,7 @@ table' is not supported by SingleStore":
             {
                 "test_runner.tests.AutoIncrementResetTest.test_autoincrement_reset1",
                 "test_runner.tests.AutoIncrementResetTest.test_autoincrement_reset2",
+                "backends.tests.SequenceResetTest.test_generic_relation",
             },
             "SingleStore does not support datetime with timezones":
             {
