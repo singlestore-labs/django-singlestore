@@ -5,7 +5,7 @@ import sys
 
 import singlestoredb as s2
 
-DJANGO_HOME = os.path.join(os.getcwd(), "testrepo")
+DJANGO_HOME = os.environ.get("DJANGO_HOME", os.path.join(os.getcwd(), "testrepo"))
 DJANGO_SINGLESTORE_HOME = os.getcwd()
 os.environ["DJANGO_HOME"] = DJANGO_HOME
 
@@ -31,6 +31,9 @@ os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_ADMIN_VIEWS"] = "ROWSTORE REFE
 
 # unique keys and many-to-many
 os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_FOREIGN_OBJECT"] = "ROWSTORE REFERENCE"
+
+#  unique keys and many-to-many
+os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_MODEL_OPTIONS"] = "ROWSTORE REFERENCE"
 
 # unique keys
 os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_AUTH_TESTS"] = "ROWSTORE REFERENCE"
