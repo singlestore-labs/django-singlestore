@@ -730,6 +730,8 @@ table' is not supported by SingleStore":
                 "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_iso_year_func_boundaries",
                 "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests." + \
                     "test_extract_func_with_timezone",   # noqa: E131
+                "datetimes.tests.DateTimesTests.test_datetimes_ambiguous_and_invalid_times",
+                "datetimes.tests.DateTimesTests.test_21432",
             },
             "SingleStore doest not support the SHA224 hashing algorithm":
             {
@@ -817,6 +819,7 @@ table' is not supported by SingleStore":
             "delete.tests.FastDeleteTests.test_fast_delete_m2m",
             "delete.tests.FastDeleteTests.test_fast_delete_qs",
             "delete.tests.FastDeleteTests.test_fast_delete_revm2m",
+            "cache.tests.CreateCacheTableForDBCacheTests.test_createcachetable_observes_database_router",
             # JSON_MATCH_ANY has different syntax so HasKeyLookup as_sql must be modified
             "queries.test_bulk_update.BulkUpdateTests.test_json_field",
             # other database for write is not respected during update TODO
