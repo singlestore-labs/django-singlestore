@@ -32,6 +32,31 @@ os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_ADMIN_VIEWS"] = "ROWSTORE REFE
 # unique keys and many-to-many
 os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_FOREIGN_OBJECT"] = "ROWSTORE REFERENCE"
 
+# unique keys and many-to-many fields
+os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_MODEL_INHERITANCE_REGRESS"] = "ROWSTORE REFERENCE"
+
+# unique keys and many-to-many fields
+os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_ADMIN_INLINES"] = "ROWSTORE REFERENCE"
+
+# many many field with ordering
+# TODO: check ordering works in default storage type
+os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_ADMIN_ORDERING"] = "ROWSTORE REFERENCE"
+
+# lot of unique
+os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_VALIDATION"] = "ROWSTORE REFERENCE"
+
+# multiple many-to-many fields
+os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_FORMS_TESTS"] = "ROWSTORE REFERENCE"
+
+# redirects_tests tests django.contrib.redirects application
+os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_REDIRECTS"] = "ROWSTORE REFERENCE"
+
+# flatpages_tests tests django.contrib.flatpages application
+os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_FLATPAGES"] = "ROWSTORE REFERENCE"
+
+# migration file is aldready present with automatically generated intermediary model
+os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_SITES_FRAMEWORK"] = "ROWSTORE REFERENCE"
+
 #  unique keys and many-to-many
 os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_MODEL_OPTIONS"] = "ROWSTORE REFERENCE"
 
@@ -46,6 +71,9 @@ os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_FIXTURES_REGRESS"] = "ROWSTORE
 
 # m2m-related issue
 os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_DELETE"] = "ROWSTORE REFERENCE"
+
+# lot of m2m fields
+os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_UNMANAGED_MODELS"] = "ROWSTORE REFERENCE"
 
 # OneToOne relationships, disable enforced unique
 os.environ["DJANGO_SINGLESTORE_NOT_ENFORCED_UNIQUE_QUERIES"] = "1"
