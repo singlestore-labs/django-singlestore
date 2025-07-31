@@ -84,6 +84,10 @@ os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_MANY_TO_MANY"] = "ROWSTORE REF
 # models with unique keys and m2m fields
 os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_FIXTURES_REGRESS"] = "ROWSTORE REFERENCE"
 
+# deprecation module using django apps for testing Django’s deprecation policy
+os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_FLATPAGES"] = "ROWSTORE REFERENCE"
+os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_REDIRECTS"] = "ROWSTORE REFERENCE"
+
 # M2M field present with custom through
 os.environ["DJANGO_SINGLESTORE_TABLE_STORAGE_TYPE_ADMIN_CHANGELIST"] = "ROWSTORE REFERENCE"
 
