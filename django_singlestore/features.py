@@ -411,6 +411,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "get_or_create.tests.UpdateOrCreateTests.test_update_with_many",
                 "get_or_create.tests.UpdateOrCreateTests.test_mti_update_non_local_concrete_fields",
                 "get_or_create.tests.UpdateOrCreateTests.test_manual_primary_key_test",
+                "filtered_relation.tests.FilteredRelationTests.test_select_for_update",
                 "m2m_through.tests.M2mThroughTests.\
 test_update_or_create_on_m2m_with_intermediate_model_value_required_fails",
                 "m2m_through.tests.M2mThroughTests.test_update_or_create_on_m2m_with_intermediate_model_value_required",
@@ -520,6 +521,9 @@ but certain django functionality requires id column to be present":
                 "backends.base.test_creation.TestDeserializeDbFromString.test_circular_reference_with_natural_key",
                 "backends.base.test_creation.TestDeserializeDbFromString.test_self_reference",
                 "backends.base.test_creation.TestDeserializeDbFromString.test_serialize_db_to_string_base_manager",
+                "signals.tests.SignalTests.test_delete_signals_origin_model",
+                "signals.tests.SignalTests.test_delete_signals_origin_queryset",
+                "signals.tests.SignalTests.test_save_and_delete_signals_with_m2m",
             },
             "LIMIT with UNION affects only the second part of the union":
             {
@@ -716,6 +720,7 @@ table' is not supported by SingleStore":
             {
                 "test_runner.tests.AutoIncrementResetTest.test_autoincrement_reset1",
                 "test_runner.tests.AutoIncrementResetTest.test_autoincrement_reset2",
+                "backends.tests.SequenceResetTest.test_generic_relation",
             },
             "SingleStore does not support datetime with timezones":
             {
@@ -731,6 +736,8 @@ table' is not supported by SingleStore":
                 "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_iso_year_func_boundaries",
                 "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests." + \
                     "test_extract_func_with_timezone",   # noqa: E131
+                "datetimes.tests.DateTimesTests.test_datetimes_ambiguous_and_invalid_times",
+                "datetimes.tests.DateTimesTests.test_21432",
             },
             "SingleStore doest not support the SHA224 hashing algorithm":
             {
@@ -759,6 +766,7 @@ table' is not supported by SingleStore":
             "SingleStore does not support altering a Table comments":
             {
                 "migrations.test_operations.OperationTests.test_remove_constraint",
+                "migrations.test_operations.OperationTests.test_alter_model_table_comment",
             },
             "The custom through model for ManyToManyField causes a get() error due to the missing id field.":
             {
@@ -818,6 +826,7 @@ table' is not supported by SingleStore":
             "delete.tests.FastDeleteTests.test_fast_delete_m2m",
             "delete.tests.FastDeleteTests.test_fast_delete_qs",
             "delete.tests.FastDeleteTests.test_fast_delete_revm2m",
+            "cache.tests.CreateCacheTableForDBCacheTests.test_createcachetable_observes_database_router",
             # JSON_MATCH_ANY has different syntax so HasKeyLookup as_sql must be modified
             "queries.test_bulk_update.BulkUpdateTests.test_json_field",
             # other database for write is not respected during update TODO
