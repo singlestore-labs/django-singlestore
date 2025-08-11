@@ -39,12 +39,13 @@ jobs:
         matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     services:
       singlestore:
-        image: ghcr.io/singlestore-labs/singlestoredb-dev:latest
+        image: ghcr.io/singlestore-labs/singlestoredb-dev
         ports:
           - 3306:3306
         env:
           SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
           ROOT_PASSWORD: ${{ secrets.SINGLESTORE_PASSWORD }}
+          SINGLESTORE_VERSION: "8.9"
 
     steps:
       - name: Remove unnecessary pre-installed toolchains for free disk space
