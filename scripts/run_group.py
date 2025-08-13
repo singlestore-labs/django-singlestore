@@ -179,7 +179,7 @@ def run_group(modules, need_keep_db):
 
         print(f"--- Running tests for module: {module} ---")
         cmd = [
-            "./testrepo/tests/runtests.py",
+            f"{DJANGO_HOME}/tests/runtests.py",
             "--settings=singlestore_settings",
             "--noinput",
             "-v", "3",
