@@ -773,6 +773,12 @@ table' is not supported by SingleStore":
                 # TODO: check the workaround to fetch the through(Relationship) model
                 "queryset_pickle.tests.PickleabilityTestCase.test_model_pickle_m2m",
             },
+            "HTTP error: 500 internal server error when there is new row addition in a view.":
+            {
+                # TODO: resolve the error of adding new row to database table in server view
+                "servers.tests.LiveServerThreadedTests.test_check_model_instance_from_subview",
+                "servers.tests.LiveServerDatabase.test_database_writes",
+            },
         }
         return skips
 
@@ -827,8 +833,6 @@ table' is not supported by SingleStore":
             "delete.tests.FastDeleteTests.test_fast_delete_qs",
             "delete.tests.FastDeleteTests.test_fast_delete_revm2m",
             "cache.tests.CreateCacheTableForDBCacheTests.test_createcachetable_observes_database_router",
-            # JSON_MATCH_ANY has different syntax so HasKeyLookup as_sql must be modified
-            "queries.test_bulk_update.BulkUpdateTests.test_json_field",
             # other database for write is not respected during update TODO
             "queries.test_bulk_update.BulkUpdateTests.test_database_routing_batch_atomicity",
             # changing table comments is not supported

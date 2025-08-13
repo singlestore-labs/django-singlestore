@@ -366,7 +366,7 @@ class DatabaseOperations(BaseDatabaseOperations):
         return "TIMESTAMPDIFF(MICROSECOND, %s, %s)" % (rhs_sql, lhs_sql), params
 
     def explain_query_prefix(self, format=None, **options):
-        prefix = self.explain_prefix
+        prefix = super().explain_query_prefix(format=format, **options)
         analyze = options.pop("analyze", False)
 
         if analyze and self.connection.features.supports_explain_analyze:

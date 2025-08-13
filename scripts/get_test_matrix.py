@@ -8,7 +8,7 @@ DEFAULT_NUM_GROUPS_FOR_TESTS = 5
 def get_test_modules(tests_root):
     subdirs_to_skip = {
         "import_error_package", "test_runner_apps", "__pycache__", "requirements",
-        "gis_tests", "postgres_tests", "distinct_on_fields",
+        "gis_tests", "postgres_tests", "distinct_on_fields", "templates",
     }
     test_modules = []
     for item in os.listdir(tests_root):
