@@ -3,8 +3,9 @@ name: Django backend tests
 on:
   pull_request:
     branches: [master, main]
-  tags:
-      - 'v*'
+  push:
+    tags:
+        - 'v*'
 
 jobs:
   generate-matrix:
