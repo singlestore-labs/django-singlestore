@@ -377,7 +377,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     def test_collations(self):
         charset = "utf8mb4"
         return {
-            "ci": f"{charset}_general_ci",
+            "ci": f"{charset}_bin",
             "cs": f"{charset}_bin",
             "non_default": f"{charset}_esperanto_ci",
             "swedish_ci": f"{charset}_swedish_ci",
