@@ -140,11 +140,11 @@ class JSONCaseInsensitiveMixinSingleStore:
     """
     def process_lhs(self, compiler, connection):
         lhs, lhs_params = super().process_lhs(compiler, connection)
-        return f"JSON_EXTRACT_STRING({lhs})", lhs_params
+        return f"LOWER(JSON_EXTRACT_STRING({lhs}))", lhs_params
 
     def process_rhs(self, compiler, connection):
         rhs, rhs_params = super().process_rhs(compiler, connection)
-        return f"({rhs}) :> LONGTEXT", rhs_params
+        return f"LOWER({rhs}) :> LONGTEXT", rhs_params
 
 
 class JSONIContainsSingleStore(JSONCaseInsensitiveMixinSingleStore, JSONIContains):

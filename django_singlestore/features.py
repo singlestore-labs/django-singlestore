@@ -336,6 +336,18 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     supports_update_conflicts_with_target = False
 
+    # TODO: change the sql formation for icontains as it fails for SS version 9.0
+    supports_json_icontains = False
+
+    # TODO: change the sql formation for iexact as it fails for SS version 9.0
+    supports_json_iexact = False
+
+    # TODO: change the sql formation for istartswith as it fails for SS version 9.0
+    supports_json_istartswith = False
+
+    # TODO: change the sql formation for iendswith as it fails for SS version 9.0
+    supports_json_iendswith = False
+
     @cached_property
     def introspected_field_types(self):
         return {
