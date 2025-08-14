@@ -1,0 +1,3 @@
+export SINGLESTORE_PASSWORD=<insert_password_here>
+export DJANGO_HOME=<insert_path_to_main_django_repo>
+python scripts/run_group.py '["dates"]' --keepdb  # replace "dates" with your test module
