@@ -46,7 +46,7 @@ jobs:
         env:
           SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
           ROOT_PASSWORD: ${{ secrets.SINGLESTORE_PASSWORD }}
-          SINGLESTORE_VERSION: ${{ secrets.SINGLESTORE_VERSION }}
+          SINGLESTORE_VERSION: 8.9
 
     steps:
       - name: Remove unnecessary pre-installed toolchains for free disk space

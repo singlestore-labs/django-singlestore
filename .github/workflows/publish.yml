@@ -35,14 +35,17 @@ jobs:
       - name: Publish PyPI package
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: "${{ secrets.PYPI_TOKEN }}"
+          # TWINE_PASSWORD: "${{ secrets.PYPI_TOKEN }}"  TODO: use this before merging
+          TWINE_PASSWORD: "${{ secrets.TEST_PYPI_TOKEN }}" 
         run: |
           ls ./dist/*
-          twine upload ./dist/*
+          twine upload --repository testpypi ./dist/*
+        # TODO: remove --repository testpypi before merging
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
