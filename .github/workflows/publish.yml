@@ -1,12 +1,15 @@
 name: Release django-singlestore
 
 on:
-  workflow_run:
-    workflows: ["Django backend tests"]
-    types:
-      - completed
+  push:
+    tags:
+        - 'v*'
 
 jobs:
+  run-tests:
+    uses: ./.github/workflows/tests.yml
+    secrets: inherit
+
   build-and-publish:
     name: Build and Publish to PyPI and GitHub Releases
     runs-on: ubuntu-latest
