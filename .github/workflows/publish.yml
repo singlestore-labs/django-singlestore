@@ -41,7 +41,7 @@ jobs:
           TWINE_PASSWORD: "${{ secrets.TEST_PYPI_TOKEN }}"
         run: |
           ls ./dist/*
-          twine upload --repository testpypi ./dist/*
+          twine upload --repository testpypi --verbose ./dist/*
         # TODO: remove --repository testpypi before merging
 
       - name: Create GitHub Release
