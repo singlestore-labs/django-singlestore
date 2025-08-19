@@ -428,3 +428,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         if isinstance(value, decimal.Decimal):
             value = float(value)
         return super().convert_durationfield_value(value, expression, connection)
+
+    def lookup_cast(self, lookup_type, internal_type=None):
+        if lookup_type in ("iexact", "icontains", "istartswith", "iendswith"):
+            return "LOWER(%s)"
+        return "%s"

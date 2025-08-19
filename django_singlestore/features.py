@@ -337,16 +337,18 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_update_conflicts_with_target = False
 
     # TODO: change the sql formation for icontains as it fails for SS version 9.0
-    supports_json_icontains = False
+    supports_json_icontains = True
 
     # TODO: change the sql formation for iexact as it fails for SS version 9.0
-    supports_json_iexact = False
+    supports_json_iexact = True
 
     # TODO: change the sql formation for istartswith as it fails for SS version 9.0
-    supports_json_istartswith = False
+    supports_json_istartswith = True
 
     # TODO: change the sql formation for iendswith as it fails for SS version 9.0
-    supports_json_iendswith = False
+    supports_json_iendswith = True
+
+    supports_case_insensitive = supports_json_icontains and supports_json_iexact
 
     @cached_property
     def introspected_field_types(self):
@@ -868,6 +870,9 @@ table' is not supported by SingleStore":
             # Auto increment fields must have BIGINT data type . default is BigAutoField
             "introspection.tests.IntrospectionTests.test_get_table_description_types",
             "introspection.tests.IntrospectionTests.test_smallautofield",
+            # SingleStore deafault collation changed from utf8mb4_general_ci to utf8mb4_bin
+            "inspectdb.tests.InspectDBTestCase.test_field_types",
+            "db_functions.comparison.test_collate.CollateTests.test_collate_filter_ci",
         }
 
         return fails

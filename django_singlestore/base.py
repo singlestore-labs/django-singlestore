@@ -124,17 +124,17 @@ class DatabaseWrapper(BaseDatabaseWrapper):
 
     operators = {
         "exact": "= %s",
-        "iexact": "LIKE %s",
+        "iexact": "LIKE LOWER(%s)",
         "contains": "LIKE BINARY %s",
-        "icontains": "LIKE %s",
+        "icontains": "LIKE LOWER(%s)",
         "gt": "> %s",
         "gte": ">= %s",
         "lt": "< %s",
         "lte": "<= %s",
         "startswith": "LIKE BINARY %s",
         "endswith": "LIKE BINARY %s",
-        "istartswith": "LIKE %s",
-        "iendswith": "LIKE %s",
+        "istartswith": "LIKE LOWER(%s)",
+        "iendswith": "LIKE LOWER(%s)",
     }
 
     # The patterns below are used to generate SQL pattern lookup clauses when
@@ -148,11 +148,11 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     pattern_esc = r"REPLACE(REPLACE(REPLACE({}, '\\', '\\\\'), '%%', '\%%'), '_', '\_')"
     pattern_ops = {
         "contains": "LIKE BINARY CONCAT('%%', {}, '%%')",
-        "icontains": "LIKE CONCAT('%%', {}, '%%')",
+        "icontains": "LIKE LOWER(CONCAT('%%', {}, '%%'))",
         "startswith": "LIKE BINARY CONCAT({}, '%%')",
-        "istartswith": "LIKE CONCAT({}, '%%')",
+        "istartswith": "LIKE LOWER(CONCAT({}, '%%'))",
         "endswith": "LIKE BINARY CONCAT('%%', {})",
-        "iendswith": "LIKE CONCAT('%%', {})",
+        "iendswith": "LIKE LOWER(CONCAT('%%', {}))",
     }
 
     isolation_levels = {
