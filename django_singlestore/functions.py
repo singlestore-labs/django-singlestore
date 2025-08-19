@@ -147,15 +147,6 @@ class JSONCaseInsensitiveMixinSingleStore:
         return f"({rhs}) :> LONGTEXT", rhs_params
 
 
-# class KeyTransformIExactSingleStore(JSONCaseInsensitiveMixinSingleStore, KeyTransformTextLookupMixin, IExact):
-#     def as_singlestore(self, compiler, connection, **extra_context):
-#         return self.as_sql(compiler, connection, **extra_context)
-
-# class KeyTransformIContainsSingleStore(JSONCaseInsensitiveMixinSingleStore, KeyTransformTextLookupMixin, IContains):
-#     def as_singlestore(self, compiler, connection, **extra_context):
-#         return self.as_sql(compiler, connection, **extra_context)
-
-
 class JSONIContainsSingleStore(JSONCaseInsensitiveMixinSingleStore, JSONIContains):
     def as_singlestore(self, compiler, connection, **extra_context):
         return self.as_sql(compiler, connection, **extra_context)
@@ -232,8 +223,6 @@ def register_functions():
     ConcatPair.as_singlestore = ConcatPairSingleStore.as_singlestore
 
     KeyTransform.register_lookup(KeyTransformExactSingleStore)
-    # KeyTransform.register_lookup(KeyTransformIExactSingleStore)
-    # KeyTransform.register_lookup(KeyTransformIContainsSingleStore)
 
     JSONField.register_lookup(JSONExactSingleStore)
     # JSONField.register_lookup(JSONIContainsSingleStore)
