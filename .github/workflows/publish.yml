@@ -37,12 +37,12 @@ jobs:
       - name: Publish PyPI package
         env:
           TWINE_USERNAME: __token__
-          # TWINE_PASSWORD: "${{ secrets.PYPI_TOKEN }}"  TODO: use this before merging
-          TWINE_PASSWORD: "${{ secrets.TEST_PYPI_TOKEN }}"
+          TWINE_PASSWORD: "${{ secrets.PYPI_TOKEN }}"
+          # TWINE_PASSWORD: "${{ secrets.TEST_PYPI_TOKEN }}" # can be used to test releases,
+          # `--repository testpypi` must be added to `twine upload` command in order to use test PyPi
         run: |
           ls ./dist/*
-          twine upload --repository testpypi --verbose ./dist/*
-        # TODO: remove --repository testpypi before merging
+          twine upload --verbose ./dist/*
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
