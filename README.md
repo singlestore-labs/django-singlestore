@@ -6,7 +6,9 @@ The current version of `django-singlestore` is being tested with Django 4.2.
 
 ## Installation
 
-Install from source: `pip install git+https://github.com/singlestore-labs/django-singlestore`.
+You can either
+- Install the latest official release from PyPi: `pip install django-singlestore`.
+- Install from source: `pip install git+https://github.com/singlestore-labs/django-singlestore`.
 
 ## Usage
 
@@ -40,7 +42,7 @@ There is a number of limitations when using SingleStore with Django, notably the
 SingleStore supports 4 different storage types for tables: COLUMNSTORE (default on most servers), ROWSTORE, REFERENCE, ROWSTORE REFERENCE.
 
 ### Major limitations
-SingleStore has several notable to differences compared to databases like Postres or MySQL which require certain design considerations and modifications to your apps.
+SingleStore has several notable to differences compared to databases like Postgres or MySQL which require certain design considerations and modifications to your apps.
 
 #### Lack of Foreign Keys
 SingleStore does not enforce FOREIGN KEY constraints. The application must ensure referential integrity itself.
