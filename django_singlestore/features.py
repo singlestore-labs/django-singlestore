@@ -856,9 +856,6 @@ table' is not supported by SingleStore":
             # Auto increment fields must have BIGINT data type . default is BigAutoField
             "introspection.tests.IntrospectionTests.test_get_table_description_types",
             "introspection.tests.IntrospectionTests.test_smallautofield",
-            # SingleStore deafault collation changed from utf8mb4_general_ci to utf8mb4_bin
-            "inspectdb.tests.InspectDBTestCase.test_field_types",
-            "db_functions.comparison.test_collate.CollateTests.test_collate_filter_ci",
         }
 
         return fails

@@ -3,7 +3,6 @@ from django.db.models.fields import TextField
 from django.db.models.fields.json import HasKeyLookup
 from django.db.models.fields.json import JSONExact
 from django.db.models.fields.json import JSONField
-from django.db.models.fields.json import JSONIContains
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.fields.json import KeyTransform
 from django.db.models.functions import Cast
@@ -147,11 +146,6 @@ class JSONCaseInsensitiveMixinSingleStore:
         return f"({rhs}) :> LONGTEXT", rhs_params
 
 
-class JSONIContainsSingleStore(JSONCaseInsensitiveMixinSingleStore, JSONIContains):
-    def as_singlestore(self, compiler, connection, **extra_context):
-        return self.as_sql(compiler, connection, **extra_context)
-
-
 def json_key_text_transform(self, compiler, connection):
     lhs, params, key_transforms = self.preprocess_lhs(compiler, connection)
 
@@ -225,4 +219,3 @@ def register_functions():
     KeyTransform.register_lookup(KeyTransformExactSingleStore)
 
     JSONField.register_lookup(JSONExactSingleStore)
-    # JSONField.register_lookup(JSONIContainsSingleStore)
