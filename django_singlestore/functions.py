@@ -26,10 +26,15 @@ def random(self, compiler, connection, **extra_context):
 
 
 def cast(self, compiler, connection, **extra_context):
+    template = "(%(expressions)s) :> %(db_type)s"
+
+    if getattr(self.output_field, "db_collation", None) is not None:
+        template += f" COLLATE {self.output_field.db_collation}"
+
     return self.as_sql(
         compiler,
         connection,
-        template="(%(expressions)s) :> %(db_type)s",
+        template=template,
         **extra_context,
     )
 
