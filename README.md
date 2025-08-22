@@ -114,6 +114,9 @@ export DJANGO_SINGLESTORE_SKIP_AUTOCOMMIT=1
 ```
 
 
+#### Manual migrations rollback
+Most of the [DDL statements](https://docs.singlestore.com/cloud/reference/sql-reference/data-definition-language-ddl/) in Singlestore cause implicit commits. This means that when a migration is partially applied, some changes need to be manually rolled back.
+
 
 #### Notes
 - In a model, `OneToOneField` must have `primary_key=True`, otherwise the model must be materialized to a reference table.
@@ -144,6 +147,7 @@ def handle_m2m_field(self, obj, field):
 - There is no implicit order by id when running `SELECT * FROM table`.
 - `dumpdata` django command does not work if a table or a referenced m2m table does not have `id` column, which is the case for m2m tables created as suggested above (see `queries_paragraph_page` table definition).
 - Fetching an instance of a custom through model using .objects.get() is not supported.
+- Case-insensitive filter requires casting the filtered column to a `TextField` with case-insensitive collation, e.g. `utf8mb4_general_ci`.
 
 There may be more limitations (and fixes) as the test suite that comes with django is still being processed.
 
