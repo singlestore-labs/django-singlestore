@@ -1,0 +1,110 @@
+name: Run tests for all SingleStore versions
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 1 * *"
+
+jobs:
+  fetch-s2-versions:
+    name: Fetch supported SingleStore versions
+    runs-on: ubuntu-latest
+    outputs:
+      versions: ${{ steps.get_versions.outputs.versions }}
+    steps:
+      - name: Get supported versions of SingleStore
+        id: get_versions
+        uses: singlestore-labs/singlestore-supported-versions@main
+
+  generate-matrix:
+    name: Generate test matrix
+    runs-on: ubuntu-latest
+    needs: fetch-s2-versions
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone test suite
+        uses: actions/checkout@v4
+        with:
+          repository: singlestore-labs/django
+          ref: singlestore-test-4.2.x
+          path: testrepo
+      - name: Generate matrix JSON
+        id: set-matrix
+        run: |
+          versions='${{ needs.fetch-s2-versions.outputs.versions }}'
+          groups=$(python scripts/get_test_matrix.py testrepo/tests)
+          full_matrix=$(jq -c -n \
+            --argjson versions "$versions" \
+            --argjson groups "$groups" \
+            '[ $versions[] as $v | $groups.include[] | {group: .group, modules: .modules, singlestore_version: $v} ]'
+          )
+          echo "$full_matrix" | tee matrix.json
+          echo "matrix=$full_matrix" >> $GITHUB_OUTPUT
+        env:
+          NUM_GROUPS: 5
+
+  run-tests:
+    name: Run tests (Group ${{ matrix.group }}, Version ${{ matrix.singlestore_version }})
+    needs: [fetch-s2-versions, generate-matrix]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    services:
+      singlestore:
+        image: ghcr.io/singlestore-labs/singlestoredb-dev
+        ports:
+          - 3306:3306
+        env:
+          SINGLESTORE_LICENSE: ${{ secrets.SINGLESTORE_LICENSE }}
+          ROOT_PASSWORD: ${{ secrets.SINGLESTORE_PASSWORD }}
+          SINGLESTORE_VERSION: ${{ matrix.singlestore_version }}
+
+    steps:
+      - name: Remove unnecessary pre-installed toolchains for free disk space
+        run: |
+          echo "=== BEFORE ==="
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/hostedtoolcache
+          docker system prune -af || true
+          sudo apt-get clean
+          echo "=== AFTER ==="
+          df -h
+
+      - name: Checkout django-singlestore repo
+        uses: actions/checkout@v4
+
+      - name: Checkout test repo
+        uses: actions/checkout@v4
+        with:
+          repository: singlestore-labs/django
+          ref: singlestore-test-4.2.x
+          path: testrepo
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install test suite and package
+        run: |
+          pip install singlestoredb
+          pip install ./testrepo
+          pip install .
+
+      - name: Run test modules for group
+        run: |
+          echo "Running test modules for group ${{ matrix.group }}"
+          python scripts/run_group.py '${{ toJson(matrix.modules) }}' --keepdb
+        env:
+          SINGLESTORE_PASSWORD: ${{ secrets.SINGLESTORE_PASSWORD }}
+          NUM_GROUPS: 5
