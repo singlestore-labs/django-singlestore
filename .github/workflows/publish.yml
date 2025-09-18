@@ -7,7 +7,7 @@ on:
 
 jobs:
   test-all-versions:
-    uses: .github/workflows/test_all_version.yml
+    uses: .github/workflows/test_all_versions.yml
 
   build-and-publish:
     name: Build and Publish to PyPI and GitHub Releases
