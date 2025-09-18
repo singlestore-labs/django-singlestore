@@ -6,13 +6,12 @@ on:
         - 'v*'
 
 jobs:
-  run-tests:
-    uses: ./.github/workflows/tests.yml
-    secrets: inherit
+  test-all-versions:
+    uses: .github/workflows/test_all_versions.yml
 
   build-and-publish:
     name: Build and Publish to PyPI and GitHub Releases
-    needs: run-tests
+    needs: test-all-versions
     runs-on: ubuntu-latest
 
     steps:
