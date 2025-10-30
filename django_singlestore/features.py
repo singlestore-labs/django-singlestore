@@ -335,7 +335,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_unlimited_charfield = False
 
     # Does the backend support database-side default values?
-    supports_db_default = False
+    supports_db_default = True
 
     supports_update_conflicts_with_target = False
 
@@ -878,6 +878,9 @@ table' is not supported by SingleStore":
             # Auto increment fields must have BIGINT data type . default is BigAutoField
             "introspection.tests.IntrospectionTests.test_get_table_description_types",
             "introspection.tests.IntrospectionTests.test_smallautofield",
+            # db_default parameter does no support complex functions.
+            "field_defaults.tests.DefaultTests.test_case_when_db_default_no_returning",
+            "migrations.test_operations.OperationTests.test_add_field_database_default_function",
         }
 
         return fails
