@@ -148,6 +148,7 @@ def handle_m2m_field(self, obj, field):
 - `dumpdata` django command does not work if a table or a referenced m2m table does not have `id` column, which is the case for m2m tables created as suggested above (see `queries_paragraph_page` table definition).
 - Fetching an instance of a custom through model using .objects.get() is not supported.
 - Case-insensitive filter requires casting the filtered column to a `TextField` with case-insensitive collation, e.g. `utf8mb4_general_ci`.
+- These complex expressions in `DEFAULT` clauses are not supported. SingleStore typically supports simple literal defaults (strings, numbers) and specific time functions like NOW() or CURRENT_TIMESTAMP() for datetime columns.
 
 There may be more limitations (and fixes) as the test suite that comes with django is still being processed.
 

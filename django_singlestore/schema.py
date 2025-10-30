@@ -112,21 +112,7 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             default_sql, default_params = self.db_default_sql(field)
             result_sql_parts.append("DEFAULT " + default_sql)
             params.extend(default_params)
-            # if hasattr(field.db_default, 'resolve_expression'):
-            #     # It's a database function (like Now())
-            #     compiler = self.connection.ops.compiler('SQLCompiler')(
-            #         query=None, connection=self.connection, using=None
-            #     )
-            #     db_default_sql = field.db_default.as_sql(compiler, self.connection)[0]
-            #     result_sql_parts.append("DEFAULT " + db_default_sql)
-            # else:
-            #     # It's a literal value
-            #     db_default_sql = self._column_default_sql(field)
-            #     if self.connection.features.requires_literal_defaults:
-            #         result_sql_parts.append("DEFAULT " + db_default_sql % self.prepare_default(field.db_default))
-            #     else:
-            #         result_sql_parts.append("DEFAULT " + db_default_sql)
-            #         params.append(field.db_default)
+
         # Include a regular default value, if requested and no db_default is set.
         elif include_default and not field.null:
             default_value = self.effective_default(field)

@@ -752,7 +752,7 @@ table' is not supported by SingleStore":
                     "test_extract_func_with_timezone",   # noqa: E131
                 "datetimes.tests.DateTimesTests.test_21432",
             },
-            "SingleStore doest not support the SHA224 hashing algorithm":
+            "SingleStore does not support the SHA224 hashing algorithm":
             {
                 "db_functions.text.test_sha224.SHA224Tests.test_transform",
                 "db_functions.text.test_sha224.SHA224Tests.test_basic",
