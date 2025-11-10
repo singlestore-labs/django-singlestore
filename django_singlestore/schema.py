@@ -69,10 +69,17 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         return self.quote_value(value)
 
     def db_default_sql(self, field):
-        """Return the sql and params for the field's database default."""
+        """
+        Return the sql and params for the field's database default.
+
+        Overridden from BaseDatabaseSchemaEditor because the parent method
+        uses "(%s)" for non-Value expressions which causes SQL syntax errors
+        in SingleStore. We use "%s" instead to generate compatible SQL.
+        """
         from django.db.models.expressions import Value
 
         db_default = field._db_default_expression
+        # Changed from parent: using "%s" instead of "(%s)" for SingleStore compatibility
         sql = (
             self._column_default_sql(field) if isinstance(db_default, Value) else "%s"
         )
@@ -311,16 +318,24 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         )
 
     def _alter_column_null_sql(self, model, old_field, new_field):
+        """
+        Generate SQL to change a column's NULL constraint.
+
+        Overridden from BaseDatabaseSchemaEditor because SingleStore's MODIFY
+        clause requires the complete column definition (including DEFAULT)
+        when changing NULL constraints on fields with db_default values.
+        """
         if new_field.db_default is NOT_PROVIDED:
             return super()._alter_column_null_sql(model, old_field, new_field)
 
+        # For fields with db_default, use MODIFY with complete column definition
         new_db_params = new_field.db_parameters(connection=self.connection)
         type_sql = self._set_field_new_type(new_field, new_db_params["type"])
         return (
             "MODIFY %(column)s %(type)s"
             % {
                 "column": self.quote_name(new_field.column),
-                "type": type_sql,
+                "type": type_sql,  # Includes DEFAULT and NULL/NOT NULL
             },
             [],
         )
