@@ -400,6 +400,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "model_fields.test_uuid.TestAsPrimaryKeyTransactionTests.test_unsaved_fk",
                 "transactions.tests.NonAutocommitTests.test_orm_query_after_error_and_rollback",
                 "inspectdb.tests.InspectDBTestCase.test_same_relations",
+                "known_related_objects.tests.ExistingRelatedInstancesTests.test_multilevel_reverse_fk_select_related",
             },
             "SingleStore does not support FLOAT/DOUBLE primary keys on ColumnStore tables":
             {
@@ -791,6 +792,11 @@ table' is not supported by SingleStore":
                 # TODO: resolve the error of adding new row to database table in server view
                 "servers.tests.LiveServerThreadedTests.test_check_model_instance_from_subview",
                 "servers.tests.LiveServerDatabase.test_database_writes",
+            },
+            "HTML parsing environment differences that cause minor differences in serialization output":
+            {
+                "test_utils.tests.HTMLEqualTests.test_parsing_errors",
+                "utils_tests.test_html.TestUtilsHtml.test_strip_tags",
             },
         }
         return skips
