@@ -16,3 +16,12 @@ CREATE TABLE `backends_object_object` (
   KEY (`from_object_id`),
   KEY (`to_object_id`)
 );
+
+CREATE TABLE `backends_schoolbus_schoolclass` (
+  `schoolbus_id` BIGINT NOT NULL,
+  `schoolclass_id` BIGINT NOT NULL,
+  SHARD KEY (`schoolbus_id`),
+  UNIQUE KEY (`schoolbus_id`, `schoolclass_id`),
+  KEY (`schoolbus_id`),
+  KEY (`schoolclass_id`)
+);
