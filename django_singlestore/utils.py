@@ -12,9 +12,6 @@ def check_version_ge(connection, min_version):
     Returns:
         bool: True if current version >= min_version, False otherwise
     """
-    if connection.vendor != "singlestore":
-        return True  # Non-SingleStore databases don't have these limitations
-
     try:
         with connection.cursor() as cursor:
             cursor.execute("SELECT @@memsql_version")
