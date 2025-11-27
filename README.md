@@ -1,8 +1,8 @@
 # SingleStore backend for Django
 
-**Attention**: The code in this repository is intended for experimental use only and is not yet fully tested, documented, or supported by SingleStore. Visit the [SingleStore Forums](https://www.singlestore.com/forum/) to ask questions about this repository.
+**Note**: This is a SingleStore-maintained Django backend for SingleStore. For questions and support, visit the [SingleStore Forums](https://www.singlestore.com/forum/).
 
-The current version of `django-singlestore` is being tested with Django 5.0.
+The project follows semantic versioning. Each `django-singlestore` release is aligned with the corresponding django version it is tested against—for example, `django-singlestore 5.0.X` with `Django 5.0`.
 
 ## Installation
 
@@ -34,6 +34,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ```
 
 Django provides a [tutorial](https://docs.djangoproject.com/en/dev/intro/tutorial01/) to get started.
+
+For a comprehensive guide on integrating Django with SingleStore, see the [Django-SingleStore Integration Guide](https://www.singlestore.com/blog/django-singlestore-integration-guide/).
 
 ## Features and Limitations
 
