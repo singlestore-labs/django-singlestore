@@ -2,7 +2,7 @@
 
 **Attention**: The code in this repository is intended for experimental use only and is not yet fully tested, documented, or supported by SingleStore. Visit the [SingleStore Forums](https://www.singlestore.com/forum/) to ask questions about this repository.
 
-The current version of `django-singlestore` is being tested with Django 4.2.
+The current version of `django-singlestore` is being tested with Django 5.0.
 
 ## Installation
 
