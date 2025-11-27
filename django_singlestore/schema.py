@@ -3,6 +3,7 @@ import os
 from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.models import Manager
 from django.db.models import NOT_PROVIDED
+from django.db.models.sql import Query
 
 
 class ModelStorageManager(Manager):
@@ -67,6 +68,32 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
     def prepare_default(self, value):
         return self.quote_value(value)
 
+    def db_default_sql(self, field):
+        """
+        Return the sql and params for the field's database default.
+
+        Overridden from BaseDatabaseSchemaEditor because the parent method
+        uses "(%s)" for non-Value expressions which causes SQL syntax errors
+        in SingleStore. We use "%s" instead to generate compatible SQL.
+        """
+        from django.db.models.expressions import Value
+
+        db_default = field._db_default_expression
+        # Changed from parent: using "%s" instead of "(%s)" for SingleStore compatibility
+        sql = (
+            self._column_default_sql(field) if isinstance(db_default, Value) else "%s"
+        )
+        query = Query(model=field.model)
+        compiler = query.get_compiler(connection=self.connection)
+        default_sql, params = compiler.compile(db_default)
+        if self.connection.features.requires_literal_defaults:
+            # Some databases don't support parameterized defaults (Oracle,
+            # SQLite). If this is the case, the individual schema backend
+            # should implement prepare_default().
+            default_sql %= tuple(self.prepare_default(p) for p in params)
+            params = []
+        return sql % default_sql, params
+
     def column_sql(self, model, field, include_default=False):
         """
         Return the column definition for a field. The field must already have
@@ -85,9 +112,16 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
             result_sql_parts.append(self._collate_sql(collation))
         if self.connection.features.supports_comments_inline and field.db_comment:
             result_sql_parts.append(self._comment_sql(field.db_comment))
-        # Include a default value, if requested.
-        include_default = include_default and not field.null
-        if include_default:
+
+        # Handle db_default (database-level default)
+        if hasattr(field, 'db_default') and field.db_default is not NOT_PROVIDED:
+            # db_default takes precedence over regular default when creating columns
+            default_sql, default_params = self.db_default_sql(field)
+            result_sql_parts.append("DEFAULT " + default_sql)
+            params.extend(default_params)
+
+        # Include a regular default value, if requested and no db_default is set.
+        elif include_default and not field.null:
             default_value = self.effective_default(field)
             if default_value is not None:
                 column_default = "DEFAULT " + self._column_default_sql(field)
@@ -221,8 +255,19 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         super().add_field(model, field)
 
         # Simulate the effect of a one-off default.
+        if hasattr(field, 'db_default') and field.db_default is not NOT_PROVIDED:
+            default_sql, default_params = self.db_default_sql(field)
+            self.execute(
+                "UPDATE %(table)s SET %(column)s = %(default_value)s"
+                % {
+                    "table": self.quote_name(model._meta.db_table),
+                    "column": self.quote_name(field.column),
+                    "default_value": default_sql,
+                },
+                default_params,
+            )
         # field.default may be unhashable, so a set isn't used for "in" check.
-        if field.default not in (None, NOT_PROVIDED):
+        elif field.default not in (None, NOT_PROVIDED):
             effective_default = self.effective_default(field)
             self.execute(
                 "UPDATE %(table)s SET %(column)s = %%s"
@@ -271,3 +316,41 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         return super()._alter_column_type_sql(
             model, old_field, new_field, new_type, old_collation, new_collation,
         )
+
+    def _alter_column_null_sql(self, model, old_field, new_field):
+        """
+        Generate SQL to change a column's NULL constraint.
+
+        Overridden from BaseDatabaseSchemaEditor because SingleStore's MODIFY
+        clause requires the complete column definition (including DEFAULT)
+        when changing NULL constraints on fields with db_default values.
+        """
+        if new_field.db_default is NOT_PROVIDED:
+            return super()._alter_column_null_sql(model, old_field, new_field)
+
+        # For fields with db_default, use MODIFY with complete column definition
+        new_db_params = new_field.db_parameters(connection=self.connection)
+        type_sql = self._set_field_new_type(new_field, new_db_params["type"])
+        return (
+            "MODIFY %(column)s %(type)s"
+            % {
+                "column": self.quote_name(new_field.column),
+                "type": type_sql,  # Includes DEFAULT and NULL/NOT NULL
+            },
+            [],
+        )
+
+    def _set_field_new_type(self, field, new_type):
+        """
+        Keep the NULL and DEFAULT properties of the old field. If it has
+        changed, it will be handled separately.
+        """
+        if field.db_default is not NOT_PROVIDED:
+            default_sql, params = self.db_default_sql(field)
+            default_sql %= tuple(self.quote_value(p) for p in params)
+            new_type += f" DEFAULT {default_sql}"
+        if field.null:
+            new_type += " NULL"
+        else:
+            new_type += " NOT NULL"
+        return new_type

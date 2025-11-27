@@ -334,6 +334,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     # Does the backend support unlimited character columns?
     supports_unlimited_charfield = False
 
+    # Does the backend support database-side default values?
+    supports_db_default = True
+
     supports_update_conflicts_with_target = False
 
     @cached_property
@@ -381,6 +384,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
             "cs": f"{charset}_bin",
             "non_default": f"{charset}_esperanto_ci",
             "swedish_ci": f"{charset}_swedish_ci",
+            "virtual": f"{charset}_unicode_ci",
         }
 
     test_now_utc_template = "UTC_TIMESTAMP"
@@ -396,6 +400,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
                 "model_fields.test_uuid.TestAsPrimaryKeyTransactionTests.test_unsaved_fk",
                 "transactions.tests.NonAutocommitTests.test_orm_query_after_error_and_rollback",
                 "inspectdb.tests.InspectDBTestCase.test_same_relations",
+                "known_related_objects.tests.ExistingRelatedInstancesTests.test_multilevel_reverse_fk_select_related",
             },
             "SingleStore does not support FLOAT/DOUBLE primary keys on ColumnStore tables":
             {
@@ -456,6 +461,9 @@ test_annotation_subquery_and_aggregate_values_chaining",
                 "aggregation.tests.AggregateTestCase.test_values_annotation_with_expression",
                 "aggregation.test_filter_argument.FilteredAggregateTests.test_filtered_aggregate_on_exists",
                 "expressions_case.tests.CaseExpressionTests.test_annotate_with_in_clause",
+                "admin_filters.tests.ListFiltersTests.test_facets_no_filter",
+                "admin_filters.tests.ListFiltersTests.test_facets_filter",
+                "admin_filters.tests.ListFiltersTests.test_facets_always",
             },
             "Feature 'Correlated subselect that can not be transformed and does not match on shard keys' \
 is not supported by SingleStore Distributed":
@@ -498,7 +506,8 @@ or DISTINCT' is not supported by SingleStore":
 but certain django functionality requires id column to be present":
             {
                 "queries.tests.ExcludeTests.test_exclude_subquery",
-                "queries.tests.ExcludeTests.test_ticket14511",
+                # "queries.tests.ExcludeTests.test_ticket14511",
+                "queries.tests.ExcludeTests.test_exclude_m2m_through",
                 "fixtures.tests.CircularReferenceTests.test_circular_reference_natural_key",
                 "fixtures.tests.CircularReferenceTests.test_circular_reference_natural_key",
                 "fixtures.tests.FixtureLoadingTests.test_dumpdata_progressbar",
@@ -524,6 +533,8 @@ but certain django functionality requires id column to be present":
                 "signals.tests.SignalTests.test_delete_signals_origin_model",
                 "signals.tests.SignalTests.test_delete_signals_origin_queryset",
                 "signals.tests.SignalTests.test_save_and_delete_signals_with_m2m",
+                "backends.base.test_creation.TestDeserializeDbFromString." + \
+                "test_serialize_db_to_string_base_manager_with_prefetch_related",
             },
             "LIMIT with UNION affects only the second part of the union":
             {
@@ -599,7 +610,13 @@ columnstore table":
             "ALTER TABLE which modifies column * from NULL to NOT NULL is not supported on a columnstore table.":
             {
                 "schema.tests.SchemaTests.test_alter_null_to_not_null_keeping_default",
+                "migrations.test_operations.OperationTests." + \
+                    "test_alter_field_change_blank_nullable_database_default_to_not_null",  # noqa: E131
                 "schema.tests.SchemaTests.test_alter_null_with_default_value_deferred_constraints",
+                "migrations.test_operations.OperationTests." + \
+                    "test_alter_field_change_nullable_to_database_default_not_null",  # noqa: E131
+                "migrations.test_operations.OperationTests." + \
+                    "test_alter_field_change_nullable_to_decimal_database_default_not_null",  # noqa: E131
             },
             "Feature 'CHANGE which changes the name of a REFERENCE table auto_increment column' is not supported \
 by SingleStore":
@@ -728,18 +745,15 @@ table' is not supported by SingleStore":
                 "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests." + \
                     "test_trunc_timezone_applied_before_truncation",  # noqa: E131
                 "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_func_with_timezone",
-                "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests." + \
-                    "test_trunc_ambiguous_and_invalid_times",  # noqa: E131
                 "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests.test_trunc_none",
                 "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests." + \
                     "test_extract_iso_year_func_boundaries",  # noqa: E131
                 "db_functions.datetime.test_extract_trunc.DateFunctionTests.test_extract_iso_year_func_boundaries",
                 "db_functions.datetime.test_extract_trunc.DateFunctionWithTimeZoneTests." + \
                     "test_extract_func_with_timezone",   # noqa: E131
-                "datetimes.tests.DateTimesTests.test_datetimes_ambiguous_and_invalid_times",
                 "datetimes.tests.DateTimesTests.test_21432",
             },
-            "SingleStore doest not support the SHA224 hashing algorithm":
+            "SingleStore does not support the SHA224 hashing algorithm":
             {
                 "db_functions.text.test_sha224.SHA224Tests.test_transform",
                 "db_functions.text.test_sha224.SHA224Tests.test_basic",
@@ -779,6 +793,11 @@ table' is not supported by SingleStore":
                 "servers.tests.LiveServerThreadedTests.test_check_model_instance_from_subview",
                 "servers.tests.LiveServerDatabase.test_database_writes",
             },
+            "HTML parsing environment differences that cause minor differences in serialization output":
+            {
+                "test_utils.tests.HTMLEqualTests.test_parsing_errors",
+                "utils_tests.test_html.TestUtilsHtml.test_strip_tags",
+            },
         }
         return skips
 
@@ -791,6 +810,15 @@ table' is not supported by SingleStore":
             # Captured queries were: 1. BEGIN  2. Actual query  3. COMMIT
             # Instead of 1 and 3 we can have 5 and 7 or other numbers which differ by 2
             # Doesn't look like something is not working, maybe check later
+            "delete_regress.tests.DeleteTests.test_self_reference_with_through_m2m_at_second_level",
+            "force_insert_update.tests.ForceInsertInheritanceTests.test_force_insert_diamond_mti",
+            "force_insert_update.tests.ForceInsertInheritanceTests.test_force_insert_false",
+            "force_insert_update.tests.ForceInsertInheritanceTests.test_force_insert_false_with_existing_parent",
+            "force_insert_update.tests.ForceInsertInheritanceTests.test_force_insert_parent",
+            "force_insert_update.tests.ForceInsertInheritanceTests.test_force_insert_with_existing_grandparent",
+            "force_insert_update.tests.ForceInsertInheritanceTests.test_force_insert_with_grandparent",
+            "model_inheritance.tests.ModelInheritanceTests.test_create_diamond_mti_common_parent",
+            "model_inheritance.tests.ModelInheritanceTests.test_create_diamond_mti_default_pk",
             "order_with_respect_to.tests.OrderWithRespectToBaseTests.test_database_routing",
             "queries.test_bulk_update.BulkUpdateTests.test_database_routing",
             "queries.test_bulk_update.BulkUpdateNoteTests.test_simple",
@@ -856,6 +884,9 @@ table' is not supported by SingleStore":
             # Auto increment fields must have BIGINT data type . default is BigAutoField
             "introspection.tests.IntrospectionTests.test_get_table_description_types",
             "introspection.tests.IntrospectionTests.test_smallautofield",
+            # db_default parameter does no support complex functions.
+            "field_defaults.tests.DefaultTests.test_case_when_db_default_no_returning",
+            "migrations.test_operations.OperationTests.test_add_field_database_default_function",
         }
 
         return fails
