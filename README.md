@@ -154,6 +154,7 @@ There may be more limitations (and fixes) as the test suite that comes with djan
 
 ## Resources
 
+* [Release flow](releasing.md) — how to cut and publish a new version
 * [Sign up](https://www.singlestore.com/cloud-trial/) for the SingleStore Free Shared Tier
 * [Documentation](https://docs.singlestore.com)
 * [Twitter](https://twitter.com/SingleStoreDevs)
