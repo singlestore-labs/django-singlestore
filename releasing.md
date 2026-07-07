@@ -4,7 +4,7 @@ This document describes how to cut a new release of `django-singlestore`.
 
 ## Versioning
 
-A connector for Django `MAJOR.MINOR.PATCH` should have a package version of `MAJOR.MINOR.*` (for example, Django 4.2.x maps to `django-singlestore` 4.2.x).
+A connector for Django `MAJOR.MINOR.PATCH` should have a package version of `MAJOR.MINOR.*` (for example, Django 4.2.x maps to `django-singlestore` 4.2.x). Releases for that Django version are cut from the stable branch `stable/singlestore-django-MAJOR.MINOR.x` (for example, `stable/singlestore-django-4.2.x`).
 
 ## Steps
 
